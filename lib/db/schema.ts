@@ -55,7 +55,9 @@ export const articleProjects = sqliteTable("article_projects", {
   sourceCount: integer("source_count").notNull(),
   searchProvider: text("search_provider").notNull(),
   aiProvider: text("ai_provider").notNull(),
-  aiModelId: text("ai_model_id").notNull(),
+  aiModelId: text("ai_model_id")
+    .notNull()
+    .references(() => aiModels.id),
   status: text("status").notNull().default("draft"),
   currentError: text("current_error"),
   ...timestamps,
@@ -63,7 +65,9 @@ export const articleProjects = sqliteTable("article_projects", {
 
 export const articleSources = sqliteTable("article_sources", {
   id: text("id").primaryKey(),
-  articleProjectId: text("article_project_id").notNull(),
+  articleProjectId: text("article_project_id")
+    .notNull()
+    .references(() => articleProjects.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   url: text("url").notNull(),
   domain: text("domain").notNull(),
@@ -77,7 +81,9 @@ export const articleSources = sqliteTable("article_sources", {
 
 export const generatedArticles = sqliteTable("generated_articles", {
   id: text("id").primaryKey(),
-  articleProjectId: text("article_project_id").notNull(),
+  articleProjectId: text("article_project_id")
+    .notNull()
+    .references(() => articleProjects.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   slug: text("slug").notNull(),
   language: text("language").notNull(),
@@ -100,8 +106,12 @@ export const generatedArticles = sqliteTable("generated_articles", {
 
 export const exportHistory = sqliteTable("export_history", {
   id: text("id").primaryKey(),
-  articleProjectId: text("article_project_id").notNull(),
-  generatedArticleId: text("generated_article_id").notNull(),
+  articleProjectId: text("article_project_id")
+    .notNull()
+    .references(() => articleProjects.id, { onDelete: "cascade" }),
+  generatedArticleId: text("generated_article_id")
+    .notNull()
+    .references(() => generatedArticles.id, { onDelete: "cascade" }),
   format: text("format").notNull(),
   status: text("status").notNull(),
   fileName: text("file_name").notNull(),

@@ -7,7 +7,8 @@ export async function listArticleProjects() {
 }
 
 export async function getArticleProjectById(id: string) {
-  return db.select().from(articleProjects).where(eq(articleProjects.id, id)).limit(1);
+  const [project] = await db.select().from(articleProjects).where(eq(articleProjects.id, id)).limit(1);
+  return project;
 }
 
 export async function listGeneratedArticles() {
