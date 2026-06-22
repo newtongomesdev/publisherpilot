@@ -1,6 +1,3 @@
-import Link from "next/link";
-import type { Route } from "next";
-
 export default function HomePage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 py-20">
@@ -10,17 +7,6 @@ export default function HomePage() {
           Pesquise fontes reais, gere artigos estruturados com IA, edite o conteúdo e exporte em
           múltiplos formatos.
         </p>
-        <div className="flex gap-4">
-          <Link
-            href={"/dashboard" as Route}
-            className="rounded-full bg-emerald-400 px-6 py-3 font-medium text-zinc-950"
-          >
-            Abrir dashboard
-          </Link>
-          <Link href={"/articles/new" as Route} className="rounded-full border border-zinc-700 px-6 py-3 font-medium">
-            Novo artigo
-          </Link>
-        </div>
       </div>
     </main>
   );
