@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Route } from "next";
 
 export default function HomePage() {
   return (
@@ -10,10 +11,13 @@ export default function HomePage() {
           múltiplos formatos.
         </p>
         <div className="flex gap-4">
-          <Link href="/dashboard" className="rounded-full bg-emerald-400 px-6 py-3 font-medium text-zinc-950">
+          <Link
+            href={"/dashboard" as Route}
+            className="rounded-full bg-emerald-400 px-6 py-3 font-medium text-zinc-950"
+          >
             Abrir dashboard
           </Link>
-          <Link href="/articles/new" className="rounded-full border border-zinc-700 px-6 py-3 font-medium">
+          <Link href={"/articles/new" as Route} className="rounded-full border border-zinc-700 px-6 py-3 font-medium">
             Novo artigo
           </Link>
         </div>
