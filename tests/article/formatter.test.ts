@@ -1,19 +1,33 @@
 import { describe, expect, it } from "vitest";
-import { toMarkdown } from "@/lib/article/markdown";
+import { formatGeneratedArticle } from "@/lib/article/formatter";
+import type { GeneratedArticle } from "@/lib/article/types";
 
-describe("toMarkdown", () => {
-  it("renders title, sections, and sources", () => {
-    const result = toMarkdown({
-      title: "Titulo",
-      excerpt: "Resumo",
-      intro: "Introducao",
-      conclusion: "Conclusao",
-      sections: [{ heading: "Secao", body: "Texto", sourceUrls: [] }],
-      sources: [{ title: "Fonte", url: "https://example.com", domain: "example.com" }],
-    } as never);
+const article: GeneratedArticle = {
+  title: "Titulo",
+  slug: "titulo",
+  language: "pt-BR",
+  niche: "tecnologia",
+  excerpt: "Resumo",
+  metaDescription: "Meta",
+  tags: ["tag"],
+  outline: ["Intro"],
+  intro: "Introducao",
+  sections: [{ heading: "Secao", body: "Texto", sourceUrls: ["https://example.com"] }],
+  facts: ["Fato"],
+  faq: [{ question: "Q?", answer: "A." }],
+  conclusion: "Conclusao",
+  sources: [{ title: "Fonte", url: "https://example.com", domain: "example.com" }],
+};
 
-    expect(result).toContain("# Titulo");
-    expect(result).toContain("## Secao");
-    expect(result).toContain("https://example.com");
+describe("formatGeneratedArticle", () => {
+  it("renders markdown and html output", () => {
+    const result = formatGeneratedArticle(article);
+
+    expect(result.markdown).toContain("# Titulo");
+    expect(result.markdown).toContain("## Secao");
+    expect(result.markdown).toContain("https://example.com");
+    expect(result.html).toContain("<h1>Titulo</h1>");
+    expect(result.html).toContain("<h2>Secao</h2>");
+    expect(result.html).toContain("<p>- [Fonte](https://example.com)</p>");
   });
 });
