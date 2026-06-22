@@ -51,4 +51,32 @@ describe("generatedArticleSchema", () => {
 
     expect(parsed.success).toBe(false);
   });
+
+  it("rejects disallowed source URL schemes", () => {
+    const javascriptSource = generatedArticleSchema.safeParse({
+      ...validArticle,
+      sources: [{ title: "Fonte", url: "javascript:alert(1)", domain: "example.com" }],
+    });
+    const dataSource = generatedArticleSchema.safeParse({
+      ...validArticle,
+      sources: [{ title: "Fonte", url: "data:text/html,boom", domain: "example.com" }],
+    });
+
+    expect(javascriptSource.success).toBe(false);
+    expect(dataSource.success).toBe(false);
+  });
+
+  it("rejects disallowed nested section source URL schemes", () => {
+    const javascriptSource = generatedArticleSchema.safeParse({
+      ...validArticle,
+      sections: [{ heading: "Secao", body: "Corpo", sourceUrls: ["javascript:alert(1)"] }],
+    });
+    const dataSource = generatedArticleSchema.safeParse({
+      ...validArticle,
+      sections: [{ heading: "Secao", body: "Corpo", sourceUrls: ["data:text/html,boom"] }],
+    });
+
+    expect(javascriptSource.success).toBe(false);
+    expect(dataSource.success).toBe(false);
+  });
 });

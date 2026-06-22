@@ -1,4 +1,9 @@
 import { z } from "zod";
+import { isAllowedArticleUrl } from "@/lib/article/url";
+
+const articleUrlSchema = z.string().url().refine(isAllowedArticleUrl, {
+  message: "Article URLs must use http or https",
+});
 
 export const generatedArticleSchema = z.object({
   title: z.string().min(1),
@@ -14,7 +19,7 @@ export const generatedArticleSchema = z.object({
     z.object({
       heading: z.string().min(1),
       body: z.string().min(1),
-      sourceUrls: z.array(z.string().url()),
+      sourceUrls: z.array(articleUrlSchema),
     }),
   ),
   facts: z.array(z.string()),
@@ -28,7 +33,7 @@ export const generatedArticleSchema = z.object({
   sources: z.array(
     z.object({
       title: z.string().min(1),
-      url: z.string().url(),
+      url: articleUrlSchema,
       domain: z.string().min(1),
     }),
   ),

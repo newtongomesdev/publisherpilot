@@ -1,11 +1,17 @@
-export function sanitizeArticleUrl(value: string) {
+export function isAllowedArticleUrl(value: string) {
   try {
     const url = new URL(value);
 
-    if (url.protocol === "http:" || url.protocol === "https:") {
-      return url.toString();
-    }
-  } catch {}
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export function sanitizeArticleUrl(value: string) {
+  if (isAllowedArticleUrl(value)) {
+    return new URL(value).toString();
+  }
 
   return "#";
 }

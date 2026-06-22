@@ -58,4 +58,15 @@ describe("formatGeneratedArticle", () => {
     expect(result.html).toContain('<li><a href="#">Fonte</a></li>');
     expect(result.html).not.toContain('href="data:text/html,boom"');
   });
+
+  it("escapes markdown-breaking source titles", () => {
+    const result = formatGeneratedArticle({
+      ...article,
+      sources: [{ title: "Fonte ](javascript:alert(1)) [extra]", url: "https://example.com", domain: "example.com" }],
+    });
+
+    expect(result.markdown).toContain("- [Fonte \\]\\(javascript:alert\\(1\\)\\) \\[extra\\]](https://example.com/)");
+    expect(result.markdown).not.toContain("- [Fonte ](javascript:alert(1)) [extra]](");
+    expect(result.html).toContain('>Fonte ](javascript:alert(1)) [extra]</a>');
+  });
 });
