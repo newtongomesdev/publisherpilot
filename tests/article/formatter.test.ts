@@ -41,7 +41,21 @@ describe("formatGeneratedArticle", () => {
       sources: [{ title: "Fonte", url: "javascript:alert(1)", domain: "example.com" }],
     });
 
+    expect(result.markdown).toContain("- [Fonte](#)");
+    expect(result.markdown).not.toContain("(javascript:alert(1))");
     expect(result.html).toContain('<li><a href="#">Fonte</a></li>');
     expect(result.html).not.toContain('href="javascript:alert(1)"');
+  });
+
+  it("neutralizes non-http source link targets", () => {
+    const result = formatGeneratedArticle({
+      ...article,
+      sources: [{ title: "Fonte", url: "data:text/html,boom", domain: "example.com" }],
+    });
+
+    expect(result.markdown).toContain("- [Fonte](#)");
+    expect(result.markdown).not.toContain("(data:text/html,boom)");
+    expect(result.html).toContain('<li><a href="#">Fonte</a></li>');
+    expect(result.html).not.toContain('href="data:text/html,boom"');
   });
 });
