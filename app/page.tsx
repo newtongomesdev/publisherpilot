@@ -7,6 +7,14 @@ export default function HomePage() {
           Pesquise fontes reais, gere artigos estruturados com IA, edite o conteúdo e exporte em
           múltiplos formatos.
         </p>
+        <div className="flex gap-4">
+          <span className="rounded-full bg-emerald-400 px-6 py-3 font-medium text-zinc-950">
+            Dashboard em breve
+          </span>
+          <span className="rounded-full border border-zinc-700 px-6 py-3 font-medium">
+            Novo artigo em breve
+          </span>
+        </div>
       </div>
     </main>
   );
