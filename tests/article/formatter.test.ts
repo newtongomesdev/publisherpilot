@@ -29,9 +29,19 @@ describe("formatGeneratedArticle", () => {
     expect(result.html).toContain("<h1>Titulo &lt;b&gt;unsafe&lt;/b&gt;</h1>");
     expect(result.html).toContain("<h2>Secao &lt;script&gt;</h2>");
     expect(result.html).toContain("<p>Texto &lt;em&gt;livre&lt;/em&gt;</p>");
-    expect(result.html).toContain('<h2>Fontes</h2><ul><li><a href="https://example.com">Fonte &lt;img&gt;</a></li></ul>');
+    expect(result.html).toContain('<h2>Fontes</h2><ul><li><a href="https://example.com/">Fonte &lt;img&gt;</a></li></ul>');
     expect(result.html).not.toContain("<script>");
     expect(result.html).not.toContain("<img>");
     expect(result.html).not.toContain("<em>livre</em>");
+  });
+
+  it("neutralizes unsafe source link targets", () => {
+    const result = formatGeneratedArticle({
+      ...article,
+      sources: [{ title: "Fonte", url: "javascript:alert(1)", domain: "example.com" }],
+    });
+
+    expect(result.html).toContain('<li><a href="#">Fonte</a></li>');
+    expect(result.html).not.toContain('href="javascript:alert(1)"');
   });
 });

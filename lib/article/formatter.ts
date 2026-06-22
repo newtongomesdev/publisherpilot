@@ -10,13 +10,25 @@ function escapeHtml(value: string) {
     .replaceAll("'", "&#39;");
 }
 
+function sanitizeHref(value: string) {
+  try {
+    const url = new URL(value);
+
+    if (url.protocol === "http:" || url.protocol === "https:") {
+      return url.toString();
+    }
+  } catch {}
+
+  return "#";
+}
+
 export function formatGeneratedArticle(article: GeneratedArticle) {
   const markdown = toMarkdown(article);
   const sections = article.sections
     .map((section) => `<section><h2>${escapeHtml(section.heading)}</h2><p>${escapeHtml(section.body)}</p></section>`)
     .join("");
   const sources = article.sources
-    .map((source) => `<li><a href="${source.url}">${escapeHtml(source.title)}</a></li>`)
+    .map((source) => `<li><a href="${sanitizeHref(source.url)}">${escapeHtml(source.title)}</a></li>`)
     .join("");
   const html = [
     `<h1>${escapeHtml(article.title)}</h1>`,

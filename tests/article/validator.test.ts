@@ -42,4 +42,13 @@ describe("generatedArticleSchema", () => {
 
     expect(parsed.success).toBe(false);
   });
+
+  it("rejects an invalid nested section source URL", () => {
+    const parsed = generatedArticleSchema.safeParse({
+      ...validArticle,
+      sections: [{ heading: "Secao", body: "Corpo", sourceUrls: ["nota-url"] }],
+    });
+
+    expect(parsed.success).toBe(false);
+  });
 });
