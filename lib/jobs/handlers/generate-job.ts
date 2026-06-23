@@ -1,21 +1,53 @@
+import { ensureAiProvidersRegistered } from "@/lib/ai/bootstrap";
 import { getAiProvider } from "@/lib/ai/registry";
 import { loadPromptFile } from "@/lib/ai/prompts";
 import { formatGeneratedArticle } from "@/lib/article/formatter";
-import { saveGeneratedArticle } from "@/lib/db/queries";
+import {
+  getArticleProjectById,
+  listProjectSources,
+  saveGeneratedArticle,
+  updateArticleProjectStatus,
+} from "@/lib/db/queries";
 
 export async function runGenerateJob(payload: Record<string, unknown>) {
-  const provider = getAiProvider(String(payload.aiProvider));
+  const articleProjectId = String(payload.articleProjectId ?? "");
+  const project = await getArticleProjectById(articleProjectId);
+  if (!project) {
+    throw new Error(`Unknown article project: ${articleProjectId}`);
+  }
+
+  ensureAiProvidersRegistered();
+  await updateArticleProjectStatus(project.id, "generating");
+
+  const provider = getAiProvider(project.aiProvider);
   if (!provider) {
-    throw new Error(`Unknown AI provider: ${String(payload.aiProvider)}`);
+    throw new Error(`Unknown AI provider: ${project.aiProvider}`);
   }
 
   const promptTemplate = await loadPromptFile("article-generation.md");
-  const prompt = `${promptTemplate}\n\nTOPIC: ${String(payload.topic)}\nLANGUAGE: ${String(payload.language)}`;
-  const article = await provider.generateArticle(prompt, { model: String(payload.aiModelId) });
+  const sources = await listProjectSources(project.id);
+  const prompt = [
+    promptTemplate,
+    `TOPIC: ${project.topic}`,
+    `NICHE: ${project.niche}`,
+    `LANGUAGE: ${project.language}`,
+    `EDITORIAL_TONE: ${project.editorialTone}`,
+    `ARTICLE_TYPE: ${project.articleType}`,
+    `DESIRED_LENGTH: ${project.desiredLength}`,
+    `COLLECTED_SOURCES: ${JSON.stringify(
+      sources.map((source) => ({
+        title: source.title,
+        url: source.url,
+        domain: source.domain,
+        snippet: source.snippet,
+      })),
+    )}`,
+  ].join("\n\n");
+  const article = await provider.generateArticle(prompt, { model: project.aiModelId });
   const formatted = formatGeneratedArticle(article);
 
   await saveGeneratedArticle({
-    articleProjectId: String(payload.articleProjectId),
+    articleProjectId: project.id,
     title: article.title,
     slug: article.slug,
     language: article.language,
@@ -34,4 +66,6 @@ export async function runGenerateJob(payload: Record<string, unknown>) {
     markdownContent: formatted.markdown,
     htmlContent: formatted.html,
   });
+
+  await updateArticleProjectStatus(project.id, "ready");
 }

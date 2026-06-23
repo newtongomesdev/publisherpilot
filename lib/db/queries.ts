@@ -32,6 +32,17 @@ export async function listQueuedJobs() {
   return db.select().from(jobQueue).orderBy(desc(jobQueue.createdAt));
 }
 
+export async function getQueuedJob() {
+  const [job] = await db
+    .select()
+    .from(jobQueue)
+    .where(eq(jobQueue.status, "queued"))
+    .orderBy(desc(jobQueue.createdAt))
+    .limit(1);
+
+  return job;
+}
+
 export async function replaceProjectSources(
   articleProjectId: string,
   rows: Array<Omit<typeof articleSources.$inferInsert, "id">>,
@@ -47,4 +58,38 @@ export async function saveGeneratedArticle(input: Omit<typeof generatedArticles.
   const record = { id: randomUUID(), ...input };
   await db.insert(generatedArticles).values(record);
   return record;
+}
+
+export async function listProjectSources(articleProjectId: string) {
+  return db.select().from(articleSources).where(eq(articleSources.articleProjectId, articleProjectId));
+}
+
+export async function updateArticleProjectStatus(id: string, status: string, currentError?: string | null) {
+  await db
+    .update(articleProjects)
+    .set({
+      status,
+      currentError: currentError ?? null,
+      updatedAt: new Date(),
+    })
+    .where(eq(articleProjects.id, id));
+}
+
+export async function updateJobStatus(id: string, status: string, errorMessage?: string | null) {
+  const timestamps =
+    status === "running"
+      ? { startedAt: new Date() }
+      : status === "completed" || status === "failed"
+        ? { finishedAt: new Date() }
+        : {};
+
+  await db
+    .update(jobQueue)
+    .set({
+      status,
+      errorMessage: errorMessage ?? null,
+      updatedAt: new Date(),
+      ...timestamps,
+    })
+    .where(eq(jobQueue.id, id));
 }
