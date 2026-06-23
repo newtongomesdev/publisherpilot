@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { enqueueGenerateSchema } from "@/app/api/generate/route";
+import { enqueueGenerateSchema } from "@/app/api/generate/schema";
 
 describe("enqueueGenerateSchema", () => {
   it("requires an articleProjectId", () => {

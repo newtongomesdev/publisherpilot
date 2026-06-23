@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createArticleProjectSchema } from "@/app/api/articles/route";
+import { createArticleProjectSchema } from "@/app/api/articles/schema";
 
 describe("createArticleProjectSchema", () => {
   it("accepts a valid article project payload", () => {

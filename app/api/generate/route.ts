@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
-
-export const enqueueGenerateSchema = z.object({
-  articleProjectId: z.string().min(1),
-});
+import { enqueueGenerateSchema } from "@/app/api/generate/schema";
 
 export async function POST(request: Request) {
   const body = await request.json();

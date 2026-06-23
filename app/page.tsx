@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function HomePage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-6 py-20">
@@ -8,12 +10,12 @@ export default function HomePage() {
           múltiplos formatos.
         </p>
         <div className="flex gap-4">
-          <span className="rounded-full bg-emerald-400 px-6 py-3 font-medium text-zinc-950">
-            Dashboard em breve
-          </span>
-          <span className="rounded-full border border-zinc-700 px-6 py-3 font-medium">
-            Novo artigo em breve
-          </span>
+          <Link href="/dashboard" className="rounded-full bg-emerald-400 px-6 py-3 font-medium text-zinc-950">
+            Abrir dashboard
+          </Link>
+          <Link href="/articles/new" className="rounded-full border border-zinc-700 px-6 py-3 font-medium">
+            Novo artigo
+          </Link>
         </div>
       </div>
     </main>
