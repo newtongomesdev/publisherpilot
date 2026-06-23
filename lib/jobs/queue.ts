@@ -11,6 +11,6 @@ export function createJobRecord(type: JobType, payload: Record<string, unknown>)
     payloadJson: createJobPayload(payload),
     attempts: 0,
     maxAttempts: 3,
-    scheduledAt: Date.now(),
+    scheduledAt: new Date(),
   };
 }
