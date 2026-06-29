@@ -1,0 +1,39 @@
+services:
+  # SearXNG - Metasearch para busca de imagens
+  searxng:
+    image: searxng/searxng:latest
+    restart: unless-stopped
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:8080/
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ChromaDB - Banco vetorial para busca semântica
+  chromadb:
+    image: chromadb/chroma:latest
+    restart: unless-stopped
+    volumes:
+      - chroma-data:/chroma/chroma
+    environment:
+      - ANONYMIZED_TELEMETRY=False
+      - IS_PERSISTENT=True
+      - PERSIST_DIRECTORY=/chroma/chroma
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v2/heartbeat')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Renderer - Puppeteer para renderizar slides em PNG
+  renderer:
+    build: ./scripts/renderer
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3003
+
+volumes:
+  chroma-data:
