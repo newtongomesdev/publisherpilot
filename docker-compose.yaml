@@ -1,4 +1,16 @@
 services:
+  # App principal (Next.js)
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      chromadb:
+        condition: service_healthy
+      searxng:
+        condition: service_healthy
+
   # SearXNG - Metasearch para busca de imagens
   searxng:
     image: searxng/searxng:latest
