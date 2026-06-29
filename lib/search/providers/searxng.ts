@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import { resolveProviderConfig } from "@/lib/integrations/provider-config";
 import type { SearchOptions, SearchProvider, SearchResult } from "@/lib/search/search-provider";
 
 type SearxngResult = {
@@ -20,14 +21,17 @@ export class SearxngSearchProvider implements SearchProvider {
   name = "searxng";
 
   async search(query: string, options: SearchOptions): Promise<SearchResult[]> {
-    if (!env.SEARXNG_URL) {
+    const config = await resolveProviderConfig(this.name, options.userId);
+    const baseUrl = config.baseUrl ?? env.SEARXNG_URL;
+
+    if (!baseUrl) {
       return [];
     }
 
     const response = await fetch(
-      `${env.SEARXNG_URL}/search?q=${encodeURIComponent(query)}&format=json`,
+      `${baseUrl}/search?q=${encodeURIComponent(query)}&format=json`,
       {
-        headers: env.SEARXNG_API_KEY ? { Authorization: `Bearer ${env.SEARXNG_API_KEY}` } : undefined,
+        headers: config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : undefined,
       },
     );
 

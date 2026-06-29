@@ -1,13 +1,24 @@
-import type { GeneratedArticle } from "@/lib/article/types";
+import type { GeneratedArticle, ArticleSection } from "@/lib/article/types";
 import { sanitizeArticleUrl } from "@/lib/article/url";
 
 function escapeMarkdownText(value: string) {
   return value.replaceAll("\\", "\\\\").replace(/([\[\]\(\)])/g, "\\$1");
 }
 
+function formatSectionImages(images: NonNullable<ArticleSection["images"]>) {
+  return images
+    .map((img) => `![${escapeMarkdownText(img.alt)}](${img.url} "${escapeMarkdownText(img.source)}")`)
+    .join("\n\n");
+}
+
 export function toMarkdown(article: GeneratedArticle) {
   const sections = article.sections
-    .map((section) => `## ${section.heading}\n\n${section.body}`)
+    .map((section) => {
+      const images = section.images && section.images.length > 0
+        ? `\n\n${formatSectionImages(section.images)}`
+        : "";
+      return `## ${section.heading}\n\n${section.body}${images}`;
+    })
     .join("\n\n");
 
   const sources = article.sources

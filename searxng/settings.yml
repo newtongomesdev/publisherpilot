@@ -1,0 +1,128 @@
+use_default_settings:
+  engines:
+    keep_only:
+      # ─── Web Search ─────────────────────────────
+      - google
+      - bing
+      - duckduckgo
+      - brave
+      - startpage
+      - wikipedia
+      # ─── Images ─────────────────────────────────
+      - google images
+      - bing images
+      - duckduckgo images
+      - pexels
+      - pixabay images
+      # ─── News ───────────────────────────────────
+      - google news
+      - bing news
+      - duckduckgo news
+
+general:
+  instance_name: "Atlas Forge SearXNG"
+  debug: false
+  contact_url: false
+  donation_url: false
+  enable_metrics: false
+
+server:
+  secret_key: "atlas-forge-searxng-k9x2m4p7q1w5e8r3t6y0u2i4o7a5s1d3f"
+  bind_address: "0.0.0.0"
+  port: 8080
+  limiter: false
+  image_proxy: false
+
+search:
+  formats:
+    - html
+    - json
+  safe_search: 0
+  autocomplete: ""
+  default_lang: "pt-BR"
+  max_page: 50
+  results_on_each_page: 50
+
+ui:
+  static_use_hash: true
+  default_locale: "pt"
+  default_theme: "simple"
+
+outgoing:
+  request_timeout: 5.0
+  max_request_timeout: 15.0
+
+engines:
+  # ─── Web ─────────────────────────────────────────
+  - name: google
+    engine: google
+    shortcut: g
+    disabled: false
+    use_mobile_ui: false
+
+  - name: bing
+    engine: bing
+    shortcut: b
+    disabled: false
+
+  - name: duckduckgo
+    engine: duckduckgo
+    shortcut: ddg
+    disabled: false
+
+  - name: brave
+    engine: brave
+    shortcut: br
+    disabled: false
+
+  - name: startpage
+    engine: startpage
+    shortcut: sp
+    disabled: false
+
+  - name: wikipedia
+    engine: wikipedia
+    shortcut: w
+    disabled: false
+
+  # ─── Images ──────────────────────────────────────
+  - name: google images
+    engine: google_images
+    shortcut: gi
+    disabled: false
+
+  - name: bing images
+    engine: bing_images
+    shortcut: bi
+    disabled: false
+
+  - name: duckduckgo images
+    engine: duckduckgo_images
+    shortcut: ddi
+    disabled: false
+
+  - name: pexels
+    engine: pexels
+    shortcut: px
+    disabled: false
+
+  - name: pixabay images
+    engine: pixabay_images
+    shortcut: pb
+    disabled: false
+
+  # ─── News ────────────────────────────────────────
+  - name: google news
+    engine: google_news
+    shortcut: gn
+    disabled: false
+
+  - name: bing news
+    engine: bing_news
+    shortcut: bn
+    disabled: false
+
+  - name: duckduckgo news
+    engine: duckduckgo_news
+    shortcut: ddn
+    disabled: false

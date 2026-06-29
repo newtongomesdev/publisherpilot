@@ -38,8 +38,8 @@ export async function processNextQueuedJob() {
     await updateJobStatus(job.id, "completed");
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown job error";
+    console.error(`[worker] Job ${job.id} (${job.type}) failed:`, message);
     await updateJobStatus(job.id, "failed", message);
-    throw error;
   }
 
   return job;

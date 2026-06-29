@@ -1,4 +1,4 @@
-import type { GeneratedArticle } from "@/lib/article/types";
+import type { GeneratedArticle, ArticleSection } from "@/lib/article/types";
 import { toMarkdown } from "@/lib/article/markdown";
 import { sanitizeArticleUrl } from "@/lib/article/url";
 
@@ -11,10 +11,21 @@ function escapeHtml(value: string) {
     .replaceAll("'", "&#39;");
 }
 
+function formatSectionImagesHtml(images: NonNullable<ArticleSection["images"]>) {
+  return images
+    .map((img) => `<figure><img src="${img.url}" alt="${escapeHtml(img.alt)}" loading="lazy" /><figcaption>${escapeHtml(img.source)}</figcaption></figure>`)
+    .join("\n");
+}
+
 export function formatGeneratedArticle(article: GeneratedArticle) {
   const markdown = toMarkdown(article);
   const sections = article.sections
-    .map((section) => `<section><h2>${escapeHtml(section.heading)}</h2><p>${escapeHtml(section.body)}</p></section>`)
+    .map((section) => {
+      const images = section.images && section.images.length > 0
+        ? `\n${formatSectionImagesHtml(section.images)}`
+        : "";
+      return `<section><h2>${escapeHtml(section.heading)}</h2><p>${escapeHtml(section.body)}</p>${images}</section>`;
+    })
     .join("");
   const sources = article.sources
     .map((source) => `<li><a href="${sanitizeArticleUrl(source.url)}">${escapeHtml(source.title)}</a></li>`)

@@ -11,10 +11,12 @@ export type AiModelSummary = {
 export type GenerateArticleOptions = {
   model: string;
   temperature?: number;
+  userId?: string;
 };
 
 export interface AiProvider {
   name: string;
-  listModels(): Promise<AiModelSummary[]>;
+  listModels(userId?: string): Promise<AiModelSummary[]>;
   generateArticle(prompt: string, options: GenerateArticleOptions): Promise<GeneratedArticle>;
+  generateText(prompt: string, options: GenerateArticleOptions): Promise<string>;
 }

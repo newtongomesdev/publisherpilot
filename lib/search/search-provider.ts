@@ -11,6 +11,7 @@ export type SearchResult = {
 export type SearchOptions = {
   limit: number;
   blockedDomains?: string[];
+  userId?: string;
 };
 
 export interface SearchProvider {

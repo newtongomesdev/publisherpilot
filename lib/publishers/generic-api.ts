@@ -1,1 +1,3 @@
-export const genericApiPublisher = { name: "generic-api" };
+import { createUnsupportedPublisher } from "@/lib/publishers/unsupported";
+
+export const genericApiPublisher = createUnsupportedPublisher("generic-api", "Generic API");

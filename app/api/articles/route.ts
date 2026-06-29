@@ -1,20 +1,125 @@
 import { NextResponse } from "next/server";
 import { createArticleProjectSchema } from "@/app/api/articles/schema";
+import { requireCurrentUser } from "@/lib/auth/session";
 import { createJobRecord } from "@/lib/jobs/queue";
+import { requireCurrentWorkspace } from "@/lib/workspaces/session";
 
 export async function POST(request: Request) {
-  const body = await request.json();
-  const parsed = createArticleProjectSchema.parse(body);
-  const { createArticleProject, createJob } = await import("@/lib/db/queries");
-  const project = await createArticleProject(parsed);
-  const searchJob = await createJob(
-    createJobRecord("search", {
-      articleProjectId: project.id,
-      query: `${project.topic} ${project.niche}`,
-      provider: project.searchProvider,
-      limit: project.sourceCount,
-    }),
-  );
+  try {
+    const user = await requireCurrentUser();
+    if (!user) {
+      return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
+    }
 
-  return NextResponse.json({ ok: true, project, searchJob }, { status: 201 });
+    let workspace;
+    try {
+      workspace = await requireCurrentWorkspace();
+    } catch (e) {
+      console.error("[articles] requireCurrentWorkspace failed:", e);
+    }
+
+    if (!workspace) {
+      // Fallback: get default workspace directly from DB
+      try {
+        const { getDefaultWorkspaceByUser } = await import("@/lib/db/queries");
+        workspace = await getDefaultWorkspaceByUser(user.id);
+      } catch (e) {
+        console.error("[articles] Fallback workspace lookup failed:", e);
+      }
+    }
+
+    if (!workspace) {
+      return NextResponse.json({ ok: false, error: "Workspace not found" }, { status: 404 });
+    }
+
+    const body = await request.json();
+    const parsed = createArticleProjectSchema.parse(body);
+    const { createArticleProject, createJob } = await import("@/lib/db/queries");
+
+    // Ensure the AI model exists in the ai_models table (required by FK)
+    try {
+      const { db } = await import("@/lib/db/client");
+      const { aiModels } = await import("@/lib/db/schema");
+      const { eq } = await import("drizzle-orm");
+
+      const [existing] = await db.select().from(aiModels).where(eq(aiModels.id, parsed.aiModelId)).limit(1);
+      if (!existing) {
+        await db.insert(aiModels).values({
+          id: parsed.aiModelId,
+          providerKey: parsed.aiProvider,
+          modelId: parsed.aiModelId,
+          name: parsed.aiModelId,
+        });
+      }
+    } catch (e) {
+      console.error("[articles] Failed to ensure AI model exists:", e);
+    }
+
+    // Transcribe audio source if provided
+    let audioTranscript = "";
+    if (parsed.audioSourceUrl && process.env.DEEPGRAM_API_KEY) {
+      try {
+        const dgUrl = new URL("https://api.deepgram.com/v1/listen");
+        dgUrl.searchParams.set("model", "nova-3");
+        dgUrl.searchParams.set("language", "pt");
+        dgUrl.searchParams.set("smart_format", "true");
+        dgUrl.searchParams.set("paragraphs", "true");
+        dgUrl.searchParams.set("punctuate", "true");
+
+        const dgResp = await fetch(dgUrl.toString(), {
+          method: "POST",
+          headers: {
+            "Authorization": `Token ${process.env.DEEPGRAM_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ url: parsed.audioSourceUrl }),
+          signal: AbortSignal.timeout(120000),
+        });
+
+        if (dgResp.ok) {
+          const dgData = await dgResp.json() as {
+            results?: { channels?: Array<{ alternatives?: Array<{ transcript?: string }> }> };
+          };
+          audioTranscript = dgData.results?.channels?.[0]?.alternatives?.[0]?.transcript ?? "";
+          console.log("[articles] Audio transcribed:", audioTranscript.length, "chars");
+        }
+      } catch (e) {
+        console.error("[articles] Audio transcription failed:", e);
+      }
+    }
+
+    // Append transcript to structure notes for the AI
+    const finalStructureNotes = [
+      parsed.structureNotes ?? "",
+      audioTranscript ? `\n\n## Transcrição da fonte de áudio\n\n${audioTranscript}` : "",
+    ].filter(Boolean).join("") || null;
+
+    const project = await createArticleProject({
+      ...parsed,
+      subtitle: parsed.subtitle ?? null,
+      keywordsJson: JSON.stringify(parsed.keywords),
+      structureNotes: finalStructureNotes,
+      userId: user.id,
+      workspaceId: workspace.id,
+    });
+    const searchJob = await createJob(
+      createJobRecord("search", {
+        articleProjectId: project.id,
+        query: `${project.topic} ${project.niche}`,
+        provider: project.searchProvider,
+        limit: project.sourceCount,
+        imageProviders: parsed.imageProviders,
+        falImageModel: parsed.falImageModel,
+      }),
+    );
+
+
+    return NextResponse.json({ ok: true, project, searchJob }, { status: 201 });
+  } catch (error) {
+    console.error("[articles] POST error:", error);
+    return NextResponse.json(
+      { ok: false, error: String(error) },
+      { status: 500 },
+    );
+  }
 }

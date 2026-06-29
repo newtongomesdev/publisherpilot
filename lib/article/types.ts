@@ -2,6 +2,7 @@ export type ArticleSection = {
   heading: string;
   body: string;
   sourceUrls: string[];
+  images?: Array<{ url: string; alt: string; source: string; provider: string }>;
 };
 
 export type ArticleFaq = {
