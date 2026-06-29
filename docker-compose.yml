@@ -1,4 +1,19 @@
 services:
+  # App principal (Next.js)
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    env_file: .env.local
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      chromadb:
+        condition: service_healthy
+      searxng:
+        condition: service_healthy
+
   # Renderiza slides HTML → PNG via Puppeteer
   renderer:
     build: ./scripts/renderer
