@@ -9,22 +9,27 @@ export function AuthForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setIsSubmitting(true);
     setError("");
 
+    const form = e.currentTarget;
     const payload = {
-      name: String(formData.get("name") ?? ""),
-      email: String(formData.get("email") ?? ""),
-      password: String(formData.get("password") ?? ""),
+      name: String(new FormData(form).get("name") ?? ""),
+      email: String(new FormData(form).get("email") ?? ""),
+      password: String(new FormData(form).get("password") ?? ""),
     };
 
     const endpoint = mode === "register" ? "/api/auth/register" : "/api/auth/login";
+    console.log("[auth] submitting to", endpoint, payload.email);
+
     const response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+    console.log("[auth] response", response.status);
 
     if (!response.ok) {
       const result = await response.json().catch(() => ({ error: "Falha de autenticacao." }));
@@ -62,7 +67,7 @@ export function AuthForm() {
         </button>
       </div>
 
-      <form action={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {mode === "register" ? (
           <input name="name" className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 p-4" placeholder="Seu nome" />
         ) : null}
