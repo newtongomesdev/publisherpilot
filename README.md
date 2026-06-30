@@ -111,19 +111,39 @@ scripts/renderer/         # Puppeteer Docker
 
 ## Deploy
 
-### Vercel + VPS
+### Coolify + VPS
 
-```
-VERCEL: Next.js app (frontend + API)
-VPS: Docker com ChromaDB + SearXNG + Renderer
-```
+Use `docker-compose.yaml` como source of truth no `Coolify`.
 
-### VPS Único
+O stack do compose inclui:
+
+- `app` - aplicacao Next.js
+- `chromadb` - banco vetorial para busca semantica
+- `renderer` - servico Puppeteer para renderizar slides
+- `searxng` - metasearch para busca web e de imagens
+
+As URLs internas ja ficam definidas no proprio compose para o ambiente do `Coolify`:
+
+- `DATABASE_URL=file:/app/data/data.db`
+- `CHROMADB_URL=http://chromadb:8000`
+- `RENDERER_URL=http://renderer:3003`
+- `SEARXNG_URL=http://searxng:8080`
+
+No painel do `Coolify`, configure apenas secrets externos e credenciais de provider, como:
+
+- `AUTH_SECRET`
+- `OPENROUTER_API_KEY`
+- `OPENAI_API_KEY`
+- `DEEPGRAM_API_KEY`
+- `FAL_KEY`
+- credenciais opcionais de publicacao
+
+### Local Docker support
 
 ```bash
 docker compose up -d
-npm run build
-npm start
+docker compose ps
+docker compose down
 ```
 
 ## Licença
