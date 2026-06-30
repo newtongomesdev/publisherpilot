@@ -11,8 +11,8 @@ const client = createClient({
 
 export const db = drizzle(client, { schema });
 
-// Run SQL migrations on startup (avoids drizzle-orm/libsql/migrator which needs node:crypto)
-(async () => {
+// Run SQL migrations on startup and expose a ready promise
+export const dbReady: Promise<void> = (async () => {
   try {
     const fs = await import("fs/promises");
     const migrationsDir = path.join(process.cwd(), "lib", "db", "migrations");
