@@ -17,4 +17,19 @@ const envSchema = z.object({
   WORDPRESS_APP_PASSWORD: z.string().optional(),
 });
 
-export const env = envSchema.parse(process.env);
+// Lazy validation: only parses at runtime, not during build
+let _env: z.infer<typeof envSchema> | null = null;
+
+function getEnv() {
+  if (!_env) {
+    _env = envSchema.parse(process.env);
+  }
+  return _env;
+}
+
+// Proxy that lazily resolves env vars on first access
+export const env = new Proxy({} as z.infer<typeof envSchema>, {
+  get(_, prop) {
+    return (getEnv() as Record<string, unknown>)[prop as string];
+  },
+});
