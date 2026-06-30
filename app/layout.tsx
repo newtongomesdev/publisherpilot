@@ -1,8 +1,5 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: "PublisherPilot",
@@ -11,8 +8,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`dark ${inter.variable}`}>
-      <body className="min-h-screen bg-[#0a0a0b] text-zinc-50 antialiased selection:bg-emerald-500/30 font-[family-name:var(--font-inter)]">
+    <html lang="pt-BR" className="dark">
+      <body className="min-h-screen bg-[#0a0a0b] font-sans text-zinc-50 antialiased selection:bg-emerald-500/30">
         <div className="fixed inset-0 z-[-1] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900/40 via-[#0a0a0b] to-[#0a0a0b]"></div>
         {children}
       </body>
