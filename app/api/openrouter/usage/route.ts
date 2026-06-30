@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db/client";
 import { apiUsageLog } from "@/lib/db/schema";
-import { sql } from "drizzle-orm";
+import { sql, gte } from "drizzle-orm";
 
 export async function GET() {
   try {
     const now = new Date();
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-    const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
     // Total cost of this app
     const [totalRow] = await db
@@ -26,7 +26,7 @@ export async function GET() {
         calls: sql<string>`count(*)`,
       })
       .from(apiUsageLog)
-      .where(sql`${apiUsageLog.createdAt} >= ${todayStart}`);
+      .where(gte(apiUsageLog.createdAt, todayStart));
 
     // This week
     const [weekRow] = await db
@@ -35,7 +35,7 @@ export async function GET() {
         calls: sql<string>`count(*)`,
       })
       .from(apiUsageLog)
-      .where(sql`${apiUsageLog.createdAt} >= ${weekStart}`);
+      .where(gte(apiUsageLog.createdAt, weekStart));
 
     // This month
     const [monthRow] = await db
@@ -44,7 +44,7 @@ export async function GET() {
         calls: sql<string>`count(*)`,
       })
       .from(apiUsageLog)
-      .where(sql`${apiUsageLog.createdAt} >= ${monthStart}`);
+      .where(gte(apiUsageLog.createdAt, monthStart));
 
     // Per-model breakdown
     const byModel = await db
