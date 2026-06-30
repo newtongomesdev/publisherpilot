@@ -5,6 +5,12 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
+      - DATABASE_URL=file:/app/data/data.db
+      - CHROMADB_URL=http://chromadb:8000
+      - RENDERER_URL=http://renderer:3003
+      - SEARXNG_URL=http://searxng:8080
+    volumes:
+      - app-data:/app/data
     depends_on:
       - searxng
       - chromadb
@@ -37,4 +43,5 @@ services:
       - PORT=3003
 
 volumes:
+  app-data:
   chroma-data:
