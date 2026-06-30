@@ -25,7 +25,6 @@ export function DashboardShell({
     { name: "Exportações", href: "/exports", icon: Download },
     { name: "Settings", href: "/settings", icon: Settings },
     { name: "Workspaces", href: "/workspaces", icon: Briefcase },
-    { name: "Deepgram", href: "/dashboard/deepgram", icon: Mic },
     { name: "Estúdio de Voz", href: "/dashboard/openrouter-tts", icon: Volume2 },
     { name: "Gerador de Imagens", href: "/dashboard/images", icon: Image },
     { name: "Gerador Suno", href: "/dashboard/suno-lyrics", icon: Music },

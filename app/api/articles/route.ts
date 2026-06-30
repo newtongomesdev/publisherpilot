@@ -57,36 +57,7 @@ export async function POST(request: Request) {
 
     // Transcribe audio source if provided
     let audioTranscript = "";
-    if (parsed.audioSourceUrl && process.env.DEEPGRAM_API_KEY) {
-      try {
-        const dgUrl = new URL("https://api.deepgram.com/v1/listen");
-        dgUrl.searchParams.set("model", "nova-3");
-        dgUrl.searchParams.set("language", "pt");
-        dgUrl.searchParams.set("smart_format", "true");
-        dgUrl.searchParams.set("paragraphs", "true");
-        dgUrl.searchParams.set("punctuate", "true");
-
-        const dgResp = await fetch(dgUrl.toString(), {
-          method: "POST",
-          headers: {
-            "Authorization": `Token ${process.env.DEEPGRAM_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ url: parsed.audioSourceUrl }),
-          signal: AbortSignal.timeout(120000),
-        });
-
-        if (dgResp.ok) {
-          const dgData = await dgResp.json() as {
-            results?: { channels?: Array<{ alternatives?: Array<{ transcript?: string }> }> };
-          };
-          audioTranscript = dgData.results?.channels?.[0]?.alternatives?.[0]?.transcript ?? "";
-          console.log("[articles] Audio transcribed:", audioTranscript.length, "chars");
-        }
-      } catch (e) {
-        console.error("[articles] Audio transcription failed:", e);
-      }
-    }
+    // Deepgram transcription removed
 
     // Append transcript to structure notes for the AI
     const finalStructureNotes = [

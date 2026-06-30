@@ -9,8 +9,7 @@ Plataforma editorial completa para gerar, editar e publicar artigos com IA.
 - **Editor de Slides** — Canvas com layers, timeline e render PNG via Puppeteer
 - **Geração de Imagens** — Fal.ai e OpenRouter com busca semântica
 - **Busca Web** — SearXNG com 15 engines (Google, Bing, DuckDuckGo, Pexels, Pixabay)
-- **TTS** — Deepgram, OpenRouter e Google Text-to-Speech
-- **Transcrição** — Deepgram com indexação automática
+- **TTS** — OpenRouter e Google Text-to-Speech
 - **Carrossel** — Geração de carrossel para redes sociais com IA
 - **Gráficos** — QuickCharts com 12 tipos de gráficos
 - **Publicação** — WordPress e exportação HTML/Markdown/PDF
@@ -20,7 +19,7 @@ Plataforma editorial completa para gerar, editar e publicar artigos com IA.
 
 - **Frontend:** Next.js 15, React, TypeScript, Tailwind CSS
 - **Backend:** Next.js API Routes, SQLite (Turso)
-- **IA:** OpenRouter, Fal.ai, Deepgram
+- **IA:** OpenRouter, Fal.ai
 - **Docker:** ChromaDB, SearXNG, Renderer (Puppeteer)
 
 ## Instalação
@@ -50,7 +49,6 @@ npm run dev
 DATABASE_URL=file:./data.db
 OPENROUTER_API_KEY=sk-or-v1-...
 FAL_KEY=fal-...
-DEEPGRAM_API_KEY=...
 SEARXNG_URL=http://localhost:8080
 CHROMADB_URL=http://localhost:8100
 RENDERER_URL=http://localhost:3003
@@ -134,7 +132,6 @@ No painel do `Coolify`, configure apenas secrets externos e credenciais de provi
 - `AUTH_SECRET`
 - `OPENROUTER_API_KEY`
 - `OPENAI_API_KEY`
-- `DEEPGRAM_API_KEY`
 - `FAL_KEY`
 - credenciais opcionais de publicacao
 

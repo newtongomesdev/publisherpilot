@@ -146,39 +146,7 @@ export function ArticleEditor({ articleProjectId, title, markdown, htmlContent, 
     );
   }
 
-  async function handleTts() {
-    if (!markdown) {
-      showFeedback("Nenhum texto para gerar áudio.", "error");
-      return;
-    }
-    showFeedback("Gerando áudio com Deepgram...", "info");
-    try {
-      const response = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: markdown }),
-      });
-      const payload = await response.json();
-      if (!response.ok || !payload.ok) {
-        showFeedback(payload.error ?? "Falha ao gerar áudio.", "error");
-        return;
-      }
-      // Download the audio file
-      const binary = atob(payload.audio);
-      const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-      const blob = new Blob([bytes], { type: "audio/mp3" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${title.toLowerCase().replace(/\s+/g, "-")}.mp3`;
-      link.click();
-      URL.revokeObjectURL(url);
-      showFeedback("Áudio gerado e baixado!", "success");
-    } catch {
-      showFeedback("Erro ao gerar áudio.", "error");
-    }
-  }
+
 
   async function handleRegenerate() {
     if (!window.confirm("Tem certeza? O artigo atual sera apagado e um novo sera gerado com as mesmas configuracoes.")) return;
@@ -274,14 +242,6 @@ export function ArticleEditor({ articleProjectId, title, markdown, htmlContent, 
           onClick={() => handleExport("markdown")}
         >
           Baixar Markdown
-        </button>
-
-        {/* Text-to-Speech */}
-        <button
-          className="w-full rounded-full border border-purple-700 bg-purple-950/40 px-4 py-3 font-medium text-purple-200 hover:bg-purple-950/60 transition-colors"
-          onClick={handleTts}
-        >
-          Gerar áudio (TTS)
         </button>
 
         <div className="border-t border-zinc-800 pt-4">
