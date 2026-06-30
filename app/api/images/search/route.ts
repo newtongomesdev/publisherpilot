@@ -7,7 +7,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: "Missing query" }, { status: 400 });
   }
 
-  const searxngUrl = process.env.SEARXNG_URL || "http://localhost:8888";
+  const searxngUrl = process.env.SEARXNG_URL || "http://localhost:8080";
   const limit = Math.min(parseInt(searchParams.get("limit") || "15", 10), 20);
 
   try {
