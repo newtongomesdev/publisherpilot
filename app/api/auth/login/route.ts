@@ -22,8 +22,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const { dbReady } = await import("@/lib/db/client");
-    await dbReady;
     const { getUserByEmail, getDefaultWorkspaceByUser } = await import("@/lib/db/queries");
 
     const user = await getUserByEmail(parsed.data.email.toLowerCase());
