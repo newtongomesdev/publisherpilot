@@ -13,18 +13,27 @@ const registerSchema = z.object({
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const parsed = registerSchema.parse(body);
+  const parsed = registerSchema.safeParse(body);
+  if (!parsed.success) {
+    const issue = parsed.error.issues[0];
+    return NextResponse.json(
+      { ok: false, error: issue?.message ?? "Dados de cadastro invalidos." },
+      { status: 400 },
+    );
+  }
+
+  const input = parsed.data;
   const { createUser, getUserByEmail, setDefaultWorkspaceIfMissing } = await import("@/lib/db/queries");
 
-  const existing = await getUserByEmail(parsed.email.toLowerCase());
+  const existing = await getUserByEmail(input.email.toLowerCase());
   if (existing) {
     return NextResponse.json({ ok: false, error: "Email ja cadastrado." }, { status: 409 });
   }
 
   const user = await createUser({
-    email: parsed.email.toLowerCase(),
-    name: parsed.name,
-    passwordHash: hashPassword(parsed.password),
+    email: input.email.toLowerCase(),
+    name: input.name,
+    passwordHash: hashPassword(input.password),
   });
 
   const workspace = await setDefaultWorkspaceIfMissing(user.id, user.name);
