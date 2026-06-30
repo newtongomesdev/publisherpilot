@@ -6,10 +6,9 @@ services:
     environment:
       - NODE_ENV=production
     depends_on:
-      chromadb:
-        condition: service_healthy
-      searxng:
-        condition: service_healthy
+      - searxng
+      - chromadb
+      - renderer
 
   # SearXNG - Metasearch para busca de imagens
   searxng:
@@ -17,11 +16,6 @@ services:
     restart: unless-stopped
     environment:
       - SEARXNG_BASE_URL=http://localhost:8080/
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/healthz"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
 
   # ChromaDB - Banco vetorial para busca semântica
   chromadb:
@@ -33,11 +27,6 @@ services:
       - ANONYMIZED_TELEMETRY=False
       - IS_PERSISTENT=True
       - PERSIST_DIRECTORY=/chroma/chroma
-    healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v2/heartbeat')"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
 
   # Renderer - Puppeteer para renderizar slides em PNG
   renderer:
