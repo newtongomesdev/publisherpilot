@@ -18,6 +18,7 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL=file:./data.db
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 RUN npm run build
 
 # Production image

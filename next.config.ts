@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  experimental: {
+    outputFileTracingExcludes: {
+      "/api/**": ["**/*.md"],
+    },
+  },
 };
 
 export default nextConfig;
