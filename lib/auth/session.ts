@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { withAdminFlag } from "@/lib/auth/admin";
 import { SESSION_COOKIE_NAME } from "@/lib/auth/constants";
 
@@ -10,10 +10,21 @@ export async function createSessionCookie(userId: string) {
   await createAuthSession({ id: sessionId, userId, expiresAt });
 
   const cookieStore = await cookies();
+  const headersList = await headers();
+  const xForwardedProto = headersList.get("x-forwarded-proto");
+  const host = headersList.get("host") || "";
+  const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
+
+  const isSecure =
+    process.env.NODE_ENV === "production" &&
+    xForwardedProto !== "http" &&
+    !isLocalhost &&
+    process.env.SECURE_COOKIES !== "false";
+
   cookieStore.set(SESSION_COOKIE_NAME, sessionId, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecure,
     path: "/",
     expires: expiresAt,
   });
