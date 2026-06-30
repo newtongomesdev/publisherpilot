@@ -1,8 +1,9 @@
 FROM node:20-alpine AS base
+RUN apk add --no-cache libc6-compat python3 py3-pip && \
+    pip install --break-system-packages edge-tts
 
 # Install dependencies
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -11,7 +12,6 @@ RUN npm install @libsql/linux-x64-musl --no-save
 
 # Install production dependencies only
 FROM base AS production-deps
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
