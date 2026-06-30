@@ -71,10 +71,11 @@ export function AuthForm() {
         {mode === "register" ? (
           <input name="name" className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 p-4" placeholder="Seu nome" />
         ) : null}
-        <input name="email" type="email" className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 p-4" placeholder="Email" />
+        <input name="email" type="email" autoComplete="email" className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 p-4" placeholder="Email" />
         <input
           name="password"
           type="password"
+          autoComplete="current-password"
           className="w-full rounded-2xl border border-zinc-800 bg-zinc-950 p-4"
           placeholder="Senha"
         />

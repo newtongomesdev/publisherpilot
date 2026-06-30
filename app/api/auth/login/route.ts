@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { getUserByEmail, getDefaultWorkspaceByUser } = await import("@/lib/db/queries");
+    const { getUserByEmail, getDefaultWorkspaceByUser, setDefaultWorkspaceIfMissing } = await import("@/lib/db/queries");
 
     const user = await getUserByEmail(parsed.data.email.toLowerCase());
     if (!user || !verifyPassword(parsed.data.password, user.passwordHash)) {
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
     await createSessionCookie(user.id);
 
-    const workspace = await getDefaultWorkspaceByUser(user.id);
+    const workspace = (await getDefaultWorkspaceByUser(user.id)) ?? (await setDefaultWorkspaceIfMissing(user.id, user.name));
     if (workspace) {
       await setActiveWorkspaceCookie(workspace.id);
     }
