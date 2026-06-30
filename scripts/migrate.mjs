@@ -23,11 +23,12 @@ await client.execute(`
   )
 `);
 
-// Enable WAL mode for better concurrency
+// Enable WAL mode and optimize synchronous writes for better concurrency/speed
 try {
   await client.execute("PRAGMA journal_mode=WAL");
+  await client.execute("PRAGMA synchronous=NORMAL");
 } catch {
-  // WAL may not work on all backends, that's ok
+  // WAL/PRAGMAs may not work on all backends, that's ok
 }
 
 const migrationsDir = join(process.cwd(), "lib", "db", "migrations");
