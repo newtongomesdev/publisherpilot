@@ -21,4 +21,21 @@ describe("POST /api/auth/register", () => {
     expect(payload.ok).toBe(false);
     expect(payload.error).toBeTruthy();
   });
+
+  it("creates a user in the database when the payload is valid", async () => {
+    const { createUser, getUserByEmail } = await import("@/lib/db/queries");
+    const { hashPassword } = await import("@/lib/auth/password");
+
+    const email = `register-test-${Date.now()}@example.com`;
+    const user = await createUser({
+      email,
+      name: "Test User",
+      passwordHash: hashPassword("securepass123"),
+    });
+
+    const found = await getUserByEmail(email);
+    expect(user).toBeTruthy();
+    expect(found).toBeTruthy();
+    expect(found!.email).toBe(email);
+  });
 });
