@@ -1,23 +1,5 @@
-use_default_settings:
-  engines:
-    keep_only:
-      # ─── Web Search ─────────────────────────────
-      - google
-      - bing
-      - duckduckgo
-      - brave
-      - startpage
-      - wikipedia
-      # ─── Images ─────────────────────────────────
-      - google images
-      - bing images
-      - duckduckgo images
-      - pexels
-      - pixabay images
-      # ─── News ───────────────────────────────────
-      - google news
-      - bing news
-      - duckduckgo news
+# Usar as configurações padrões do SearXNG para todos os motores (Web, Imagens, News, etc.)
+use_default_settings: true
 
 general:
   instance_name: "Atlas Forge SearXNG"
@@ -31,7 +13,7 @@ server:
   bind_address: "0.0.0.0"
   port: 8080
   limiter: false
-  image_proxy: false
+  image_proxy: true # Ativar o proxy de imagem ajuda a carregar imagens que bloqueiam hotlinking
 
 search:
   formats:
@@ -51,78 +33,3 @@ ui:
 outgoing:
   request_timeout: 5.0
   max_request_timeout: 15.0
-
-engines:
-  # ─── Web ─────────────────────────────────────────
-  - name: google
-    engine: google
-    shortcut: g
-    disabled: false
-    use_mobile_ui: false
-
-  - name: bing
-    engine: bing
-    shortcut: b
-    disabled: false
-
-  - name: duckduckgo
-    engine: duckduckgo
-    shortcut: ddg
-    disabled: false
-
-  - name: brave
-    engine: brave
-    shortcut: br
-    disabled: false
-
-  - name: startpage
-    engine: startpage
-    shortcut: sp
-    disabled: false
-
-  - name: wikipedia
-    engine: wikipedia
-    shortcut: w
-    disabled: false
-
-  # ─── Images ──────────────────────────────────────
-  - name: google images
-    engine: google_images
-    shortcut: gi
-    disabled: false
-
-  - name: bing images
-    engine: bing_images
-    shortcut: bi
-    disabled: false
-
-  - name: duckduckgo images
-    engine: duckduckgo_images
-    shortcut: ddi
-    disabled: false
-
-  - name: pexels
-    engine: pexels
-    shortcut: px
-    disabled: false
-
-  - name: pixabay images
-    engine: pixabay_images
-    shortcut: pb
-    disabled: false
-
-  # ─── News ────────────────────────────────────────
-  - name: google news
-    engine: google_news
-    shortcut: gn
-    disabled: false
-
-  - name: bing news
-    engine: bing_news
-    shortcut: bn
-    disabled: false
-
-  - name: duckduckgo news
-    engine: duckduckgo_news
-    shortcut: ddn
-    disabled: false
