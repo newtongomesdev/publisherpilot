@@ -23,13 +23,107 @@ function mdInline(text: string) {
     .replace(/`(.+?)`/g, '<code>$1</code>');  // `code`
 }
 
-/** Convert Markdown body (paragraphs with inline formatting) to HTML */
-function mdBody(text: string) {
-  return text
-    .split("\n\n")
-    .filter((p) => p.trim())
-    .map((p) => `<p>${mdInline(esc(p.trim()))}</p>`)
-    .join("\n");
+/** Convert Markdown body to structured HTML (line-by-line parsing) */
+function parseMarkdownToHtml(markdown: string): string {
+  if (!markdown) return "";
+  
+  // Escape basic HTML
+  let html = markdown
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+
+  const lines = html.split("\n");
+  let result: string[] = [];
+  let inList = false;
+  let listType: "ul" | "ol" | null = null;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    // Skip empty lines
+    if (!line) {
+      if (inList) {
+        result.push(`</${listType}>`);
+        inList = false;
+        listType = null;
+      }
+      continue;
+    }
+
+    // Headers
+    if (line.startsWith("### ")) {
+      if (inList) { result.push(`</${listType}>`); inList = false; listType = null; }
+      result.push(`<h3>${mdInline(line.slice(4))}</h3>`);
+      continue;
+    }
+    if (line.startsWith("## ")) {
+      if (inList) { result.push(`</${listType}>`); inList = false; listType = null; }
+      result.push(`<h2>${mdInline(line.slice(3))}</h2>`);
+      continue;
+    }
+    if (line.startsWith("# ")) {
+      if (inList) { result.push(`</${listType}>`); inList = false; listType = null; }
+      result.push(`<h1>${mdInline(line.slice(2))}</h1>`);
+      continue;
+    }
+
+    // Bullet lists
+    const isBullet = line.startsWith("- ") || line.startsWith("* ") || line.startsWith("• ");
+    const isNumbered = /^\d+\.\s+/.test(line);
+
+    if (isBullet) {
+      if (inList && listType !== "ul") {
+        result.push(`</${listType}>`);
+        inList = false;
+      }
+      if (!inList) {
+        result.push("<ul>");
+        inList = true;
+        listType = "ul";
+      }
+      const cleanLine = line.replace(/^([-*•])\s+/, "");
+      result.push(`<li>${mdInline(cleanLine)}</li>`);
+      continue;
+    }
+
+    if (isNumbered) {
+      if (inList && listType !== "ol") {
+        result.push(`</${listType}>`);
+        inList = false;
+      }
+      if (!inList) {
+        result.push("<ol>");
+        inList = true;
+        listType = "ol";
+      }
+      const cleanLine = line.replace(/^\d+\.\s+/, "");
+      result.push(`<li>${mdInline(cleanLine)}</li>`);
+      continue;
+    }
+
+    // Regular line (paragraph)
+    if (inList) {
+      result.push(`</${listType}>`);
+      inList = false;
+      listType = null;
+    }
+
+    // Merge consecutive text lines into the same paragraph
+    const lastIdx = result.length - 1;
+    if (lastIdx >= 0 && result[lastIdx].startsWith("<p>") && result[lastIdx].endsWith("</p>")) {
+      const prevContent = result[lastIdx].slice(3, -4);
+      result[lastIdx] = `<p>${prevContent} ${mdInline(line)}</p>`;
+    } else {
+      result.push(`<p>${mdInline(line)}</p>`);
+    }
+  }
+
+  if (inList) {
+    result.push(`</${listType}>`);
+  }
+
+  return result.join("\n");
 }
 
 function safeUrl(url: string) {
@@ -85,7 +179,7 @@ export async function GET(request: Request) {
     } catch {}
 
     const sectionsHtml = sections.map((s, i) => {
-      const bodyHtml = mdBody(s.body);
+      const bodyHtml = parseMarkdownToHtml(s.body);
 
       // Prefer images embedded in sections (new format), fall back to legacy flat array
       let sectionImages = s.images && s.images.length > 0
@@ -103,10 +197,10 @@ export async function GET(request: Request) {
       `<li><a href="#${encodeURIComponent(item)}">${esc(item)}</a></li>`
     ).join("\n");
 
-    const introHtml = mdBody(article.intro);
-    const conclusionHtml = mdBody(article.conclusion);
+    const introHtml = parseMarkdownToHtml(article.intro);
+    const conclusionHtml = parseMarkdownToHtml(article.conclusion);
     const factsHtml = facts.map((f) => `<li>${mdInline(esc(f))}</li>`).join("\n");
-    const faqHtml = faq.map((item) => `<details class="faq-item"><summary>${esc(item.question)}</summary><p>${mdBody(item.answer)}</p></details>`).join("\n");
+    const faqHtml = faq.map((item) => `<details class="faq-item"><summary>${esc(item.question)}</summary>${parseMarkdownToHtml(item.answer)}</details>`).join("\n");
     const sourcesHtml = sources.map((s) => `<li><a href="${safeUrl(s.url)}" target="_blank" rel="noopener">${esc(s.title)}</a> <span class="domain">(${esc(s.domain)})</span></li>`).join("\n");
     const tagsHtml = tags.map((t) => `<span class="tag">${esc(t)}</span>`).join(" ");
 
