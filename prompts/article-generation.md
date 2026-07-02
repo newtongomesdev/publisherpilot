@@ -63,6 +63,6 @@ Retorne APENAS um JSON valido (sem markdown, sem code blocks, sem texto fora do 
 9. "intro": introducao envolvente com 2-3 paragrafos.
 10. "sections": entre 3 e 8 secoes, cada uma com heading, body (2-4 paragrafos) e sourceUrls (URLs das COLLECTED_SOURCES fornecidas).
 11. "facts": entre 3 e 7 fatos relevantes sobre o tema.
-12. "faq": entre 3 e 6 perguntas e respostas.
+12. "faq": entre 3 e 6 perguntas e respostas. Cada resposta deve ser uma única string (com múltiplos parágrafos separados por \n\n se necessário, nunca duplique a chave "answer").
 13. "conclusion": conclusao com resumo e call to action.
 14. "sources": apenas fontes reais fornecidas em COLLECTED_SOURCES. Copie title, url e domain exatamente como fornecidos.

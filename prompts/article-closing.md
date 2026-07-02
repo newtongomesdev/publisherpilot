@@ -23,7 +23,7 @@ ARTICLE_SECTIONS_SUMMARY
 
 2. **Fatos**: Liste entre 7 e 12 fatos relevantes e impactantes sobre o tema.
 
-3. **FAQ**: Crie entre 5 e 8 perguntas frequentes com respostas detalhadas (cada resposta com 2-3 paragrafos).
+3. **FAQ**: Crie entre 5 e 8 perguntas frequentes com respostas detalhadas. Cada resposta deve conter 2-3 parágrafos reunidos em uma ÚNICA string, separados por duas quebras de linha (\n\n). NUNCA duplique a chave "answer" dentro do mesmo objeto.
 
 ## Formato de saida
 
@@ -37,7 +37,7 @@ Retorne APENAS um JSON valido:
   "faq": [
     {
       "question": "Pergunta frequente sobre o tema?",
-      "answer": "Resposta detalhada com 2-3 paragrafos"
+      "answer": "Parágrafo 1 da resposta detalhada.\n\nParágrafo 2 da resposta detalhada."
     }
   ]
 }
