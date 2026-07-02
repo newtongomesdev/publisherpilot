@@ -51,7 +51,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/scripts/docker-entrypoint.sh ./sc
 
 # Create data directory for SQLite and give ownership to nextjs user
 RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
-RUN chmod +x /app/scripts/docker-entrypoint.sh
+RUN sed -i 's/\r$//' /app/scripts/docker-entrypoint.sh && chmod +x /app/scripts/docker-entrypoint.sh
 
 USER nextjs
 
