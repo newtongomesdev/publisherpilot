@@ -23,7 +23,7 @@ services:
     environment:
       - SEARXNG_BASE_URL=http://localhost:8080/
     volumes:
-      - ./searxng:/etc/searxng:ro
+      - ./searxng_config:/etc/searxng
 
   # ChromaDB - Banco vetorial para busca semântica
   chromadb:
