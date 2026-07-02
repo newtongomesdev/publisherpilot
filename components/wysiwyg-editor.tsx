@@ -7,6 +7,7 @@ import Placeholder from "@tiptap/extension-placeholder";
 import Dropcursor from "@tiptap/extension-dropcursor";
 import Gapcursor from "@tiptap/extension-gapcursor";
 import { Node, mergeAttributes } from "@tiptap/core";
+import { Sparkles, Search, Link as LinkIcon, Loader2, X } from "lucide-react";
 
 // ─── Proxy helper ────────────────────────────────────────────
 function proxyUrl(url: string): string {
@@ -358,6 +359,103 @@ const turndownService = new TurndownService({
 
 export function WysiwygEditor({ initialHtml, onSave, onCancel }: WysiwygEditorProps) {
   const [isSaving, setIsSaving] = useState(false);
+  const [showImageDialog, setShowImageDialog] = useState(false);
+  const [dialogTab, setDialogTab] = useState<"search" | "ai" | "url">("search");
+  
+  // Search tab states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Array<{ src: string; thumbnail: string; title: string }>>([]);
+  const [searching, setSearching] = useState(false);
+  
+  // AI tab states
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiModel, setAiModel] = useState("fal-ai/flux/schnell");
+  const [aiAspectRatio, setAiAspectRatio] = useState("1:1");
+  const [generating, setGenerating] = useState(false);
+  const [aiModels, setAiModels] = useState<Array<{ modelId: string; name: string }>>([
+    { modelId: "fal-ai/flux/schnell", name: "Flux Schnell (Rápido)" },
+    { modelId: "fal-ai/flux/dev", name: "Flux Dev (Alta Qualidade)" },
+    { modelId: "fal-ai/flux-realism", name: "Flux Realism (Realista)" },
+    { modelId: "fal-ai/stable-diffusion-v3-medium", name: "SD3 Medium" },
+  ]);
+
+  // URL tab states
+  const [imageUrl, setImageUrl] = useState("");
+
+  // Load models from API
+  useEffect(() => {
+    if (showImageDialog) {
+      fetch("/api/images/fal/models")
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.ok && data.models) {
+            setAiModels(data.models);
+          }
+        })
+        .catch((err) => console.error("Error fetching Fal.ai models in editor:", err));
+    }
+  }, [showImageDialog]);
+
+  const handleSearxngSearch = async () => {
+    if (!searchQuery.trim()) return;
+    setSearching(true);
+    try {
+      const resp = await fetch(`/api/images/search?q=${encodeURIComponent(searchQuery)}&limit=15`);
+      const data = await resp.json();
+      if (data.ok) {
+        setSearchResults(data.results || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const handleGenerateAiImage = async () => {
+    if (!aiPrompt.trim()) return;
+    setGenerating(true);
+    try {
+      const response = await fetch("/api/images/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: aiPrompt.trim(),
+          model: aiModel,
+          aspectRatio: aiAspectRatio,
+        }),
+      });
+      const data = await response.json();
+      if (response.ok && data.ok && data.image?.url) {
+        if (editor) {
+          editor.chain().focus().insertContent({
+            type: "resizableImage",
+            attrs: { src: data.image.url, alt: aiPrompt, width: "100%" },
+          }).run();
+        }
+        setShowImageDialog(false);
+        setAiPrompt("");
+      } else {
+        alert(data.error || "Falha ao gerar imagem.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao conectar com o gerador de imagem.");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleInsertUrl = () => {
+    if (imageUrl && editor) {
+      editor.chain().focus().insertContent({
+        type: "resizableImage",
+        attrs: { src: imageUrl, alt: "", width: "100%" },
+      }).run();
+      setShowImageDialog(false);
+      setImageUrl("");
+    }
+  };
 
   // Proxy all external image URLs in the initial HTML
   const proxiedHtml = proxyHtmlImages(initialHtml);
@@ -394,14 +492,8 @@ export function WysiwygEditor({ initialHtml, onSave, onCancel }: WysiwygEditorPr
   }, [editor, onSave]);
 
   const addImage = useCallback(() => {
-    const url = window.prompt("URL da imagem:");
-    if (url && editor) {
-      editor.chain().focus().insertContent({
-        type: "resizableImage",
-        attrs: { src: url, alt: "", width: "100%" },
-      }).run();
-    }
-  }, [editor]);
+    setShowImageDialog(true);
+  }, []);
 
   if (!editor) return null;
 
@@ -547,6 +639,205 @@ export function WysiwygEditor({ initialHtml, onSave, onCancel }: WysiwygEditorPr
           Cancelar
         </button>
       </div>
+
+      {/* Image Insertion Dialog (Modal) */}
+      {showImageDialog && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-[540px] max-w-full text-zinc-100 flex flex-col gap-4 shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+            {/* Close button */}
+            <button
+              onClick={() => setShowImageDialog(false)}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-200"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <h3 className="text-lg font-bold text-zinc-100 flex items-center gap-2">
+              Inserir Imagem
+            </h3>
+
+            {/* Tab selector */}
+            <div className="flex border-b border-zinc-800/80">
+              <button
+                onClick={() => setDialogTab("search")}
+                className={`flex-1 py-2 text-sm font-semibold border-b-2 flex items-center justify-center gap-1.5 transition-colors ${
+                  dialogTab === "search" ? "border-emerald-500 text-emerald-400" : "border-transparent text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                <Search className="h-4 w-4" /> Buscar (SearXNG)
+              </button>
+              <button
+                onClick={() => setDialogTab("ai")}
+                className={`flex-1 py-2 text-sm font-semibold border-b-2 flex items-center justify-center gap-1.5 transition-colors ${
+                  dialogTab === "ai" ? "border-emerald-500 text-emerald-400" : "border-transparent text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                <Sparkles className="h-4 w-4" /> Gerar com IA
+              </button>
+              <button
+                onClick={() => setDialogTab("url")}
+                className={`flex-1 py-2 text-sm font-semibold border-b-2 flex items-center justify-center gap-1.5 transition-colors ${
+                  dialogTab === "url" ? "border-emerald-500 text-emerald-400" : "border-transparent text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                <LinkIcon className="h-4 w-4" /> Inserir URL
+              </button>
+            </div>
+
+            {/* Tab content */}
+            <div className="min-h-[280px]">
+              {dialogTab === "search" && (
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Buscar imagens no SearXNG..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSearxngSearch()}
+                      className="flex-1 px-4 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm outline-none focus:border-emerald-500"
+                    />
+                    <button
+                      onClick={handleSearxngSearch}
+                      disabled={searching}
+                      className="px-5 py-2 rounded-xl bg-emerald-500 text-white font-semibold text-sm hover:bg-emerald-400 disabled:opacity-50 flex items-center gap-1.5"
+                    >
+                      {searching ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" /> Buscando
+                        </>
+                      ) : (
+                        "Buscar"
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Results grid */}
+                  {searchResults.length > 0 ? (
+                    <div className="grid grid-cols-3 gap-2 max-h-[240px] overflow-y-auto pr-1">
+                      {searchResults.map((result, i) => (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            if (editor) {
+                              editor.chain().focus().insertContent({
+                                type: "resizableImage",
+                                attrs: { src: result.src, alt: result.title, width: "100%" },
+                              }).run();
+                            }
+                            setShowImageDialog(false);
+                          }}
+                          className="relative aspect-video rounded-xl overflow-hidden border border-zinc-800 hover:border-emerald-500 transition group/img"
+                        >
+                          <img
+                            src={result.thumbnail}
+                            alt={result.title}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition flex items-center justify-center">
+                            <span className="text-xs text-white font-semibold">Inserir</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    !searching && (
+                      <div className="flex flex-col items-center justify-center py-10 text-zinc-500 gap-2">
+                        <Search className="h-8 w-8 text-zinc-700" />
+                        <p className="text-sm">Digite uma palavra-chave para buscar</p>
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+
+              {dialogTab === "ai" && (
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-zinc-400">Prompt da Imagem</label>
+                    <textarea
+                      placeholder="Descreva a imagem que deseja gerar..."
+                      value={aiPrompt}
+                      onChange={(e) => setAiPrompt(e.target.value)}
+                      className="w-full h-20 p-3 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm outline-none resize-none placeholder:text-zinc-650 focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-zinc-400">Modelo de IA</label>
+                      <select
+                        value={aiModel}
+                        onChange={(e) => setAiModel(e.target.value)}
+                        className="w-full p-2.5 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm outline-none focus:border-emerald-500"
+                      >
+                        {aiModels.map((m) => (
+                          <option key={m.modelId} value={m.modelId}>
+                            {m.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-semibold text-zinc-400">Proporção (Aspect Ratio)</label>
+                      <select
+                        value={aiAspectRatio}
+                        onChange={(e) => setAiAspectRatio(e.target.value)}
+                        className="w-full p-2.5 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm outline-none focus:border-emerald-500"
+                      >
+                        <option value="1:1">1:1 Quadrado</option>
+                        <option value="16:9">16:9 Paisagem</option>
+                        <option value="9:16">9:16 Retrato</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleGenerateAiImage}
+                    disabled={generating || !aiPrompt.trim()}
+                    className="w-full py-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold text-sm hover:from-emerald-400 hover:to-teal-400 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10"
+                  >
+                    {generating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" /> Gerando imagem com IA...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" /> Gerar Imagem
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {dialogTab === "url" && (
+                <div className="space-y-4 py-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-zinc-400">Endereço da Imagem (URL)</label>
+                    <input
+                      type="url"
+                      placeholder="https://exemplo.com/imagem.jpg"
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-100 text-sm outline-none focus:border-emerald-500"
+                    />
+                  </div>
+
+                  <button
+                    onClick={handleInsertUrl}
+                    disabled={!imageUrl.trim()}
+                    className="w-full py-2.5 rounded-full bg-zinc-800 border border-zinc-700 hover:bg-zinc-750 text-zinc-200 hover:text-white font-semibold text-sm transition-all"
+                  >
+                    Inserir Imagem
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
