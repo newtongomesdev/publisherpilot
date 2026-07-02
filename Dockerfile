@@ -1,9 +1,6 @@
-FROM node:20-slim AS base
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 \
-    python3-pip \
-    && rm -rf /var/lib/apt/lists/* \
-    && pip3 install --break-system-packages edge-tts
+FROM node:20-alpine AS base
+RUN apk add --no-cache libc6-compat gcompat python3 py3-pip && \
+    pip install --break-system-packages edge-tts
 
 # Install dependencies
 FROM base AS deps
@@ -11,12 +8,14 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 RUN npm ci
+RUN npm install @libsql/linux-x64-musl --no-save
 
 # Install production dependencies only
 FROM base AS production-deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
+RUN npm install @libsql/linux-x64-musl --no-save
 
 # Build the application
 FROM base AS builder
