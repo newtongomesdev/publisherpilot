@@ -1,21 +1,16 @@
-FROM node:20-slim
-
-RUN apt-get update && apt-get install -y \
-    chromium \
-    fonts-noto-color-emoji \
-    --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+# Use the official Puppeteer image which already includes Chromium and its dependencies
+FROM ghcr.io/puppeteer/puppeteer:latest
 
 WORKDIR /app
 
-COPY package*.json ./
+# The puppeteer image runs as 'pptruser' by default.
+# We copy files with ownership to avoid permission issues.
+COPY --chown=pptruser:pptruser package*.json ./
 RUN npm install --omit=dev
 
-COPY . .
+COPY --chown=pptruser:pptruser . .
 
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
-
+# We don't need to set PUPPETEER_EXECUTABLE_PATH because the base image handles it.
 EXPOSE 3003
 
 CMD ["node", "server.js"]
