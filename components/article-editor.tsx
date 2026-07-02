@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { WysiwygEditor } from "@/components/wysiwyg-editor";
 import { ContentSuggestions } from "@/components/content-suggestions";
+import { Share2 } from "lucide-react";
 
 type ArticleEditorProps = {
   articleProjectId: string;
@@ -20,6 +21,14 @@ export function ArticleEditor({ articleProjectId, title, markdown, htmlContent, 
   function showFeedback(msg: string, type: "success" | "error" | "info" = "info") {
     setFeedback(msg);
     setFeedbackType(type);
+  }
+
+  function handleShare() {
+    const shareUrl = `${window.location.origin}/share/${articleProjectId}`;
+    navigator.clipboard.writeText(shareUrl).then(
+      () => showFeedback("Link de compartilhamento copiado!", "success"),
+      () => showFeedback("Falha ao copiar o link.", "error")
+    );
   }
 
   function handlePreview() {
@@ -218,6 +227,15 @@ export function ArticleEditor({ articleProjectId, title, markdown, htmlContent, 
           onClick={handlePreview}
         >
           Visualizar artigo
+        </button>
+
+        {/* Share button */}
+        <button
+          className="w-full rounded-full border border-zinc-700 bg-zinc-800/40 px-4 py-3 font-medium text-zinc-200 hover:bg-zinc-800/60 transition-colors flex items-center justify-center gap-2"
+          onClick={handleShare}
+        >
+          <Share2 className="h-4 w-4" />
+          Compartilhar artigo
         </button>
 
         {/* PDF via Print */}
