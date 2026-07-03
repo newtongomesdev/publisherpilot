@@ -1,0 +1,18 @@
+# Limiter configuration - allow all internal traffic
+# This file prevents the "missing config file: limiter.toml" warning
+# and ensures the bot detection module does not block our API requests.
+
+[botdetection.ip_limit]
+# Disable IP-based rate limiting entirely
+link_token = false
+
+[botdetection.ip_lists]
+# No blocked IPs
+block_ip = []
+# Pass all IPs (allow our internal Docker network)
+pass_ip = [
+  "127.0.0.0/8",
+  "10.0.0.0/8",
+  "172.16.0.0/12",
+  "192.168.0.0/16",
+]
