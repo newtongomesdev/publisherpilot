@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
+    webpackBuildWorker: false,
     outputFileTracingExcludes: {
       "/api/**": ["**/*.md"],
     },
