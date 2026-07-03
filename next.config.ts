@@ -10,11 +10,8 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: {
-    webpackBuildWorker: false,
-    outputFileTracingExcludes: {
-      "/api/**": ["**/*.md"],
-    },
+  outputFileTracingExcludes: {
+    "/api/**": ["**/*.md"],
   },
 };
 
