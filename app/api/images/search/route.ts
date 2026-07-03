@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     });
 
     if (!resp.ok) {
-      return NextResponse.json({ ok: false, error: `SearXNG returned ${resp.status}` }, { status: 502 });
+      return NextResponse.json({ ok: false, error: `SearXNG returned ${resp.status}` }, { status: 400 });
     }
 
     const data = (await resp.json()) as { results?: Array<{
@@ -47,7 +47,7 @@ export async function GET(request: Request) {
       });
 
     return NextResponse.json({ ok: true, results });
-  } catch {
-    return NextResponse.json({ ok: false, error: "Failed to reach SearXNG" }, { status: 502 });
+  } catch (err: any) {
+    return NextResponse.json({ ok: false, error: "Failed to reach SearXNG: " + err?.message }, { status: 400 });
   }
 }
