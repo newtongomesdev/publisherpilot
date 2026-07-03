@@ -31,7 +31,11 @@ export class SearxngSearchProvider implements SearchProvider {
     const response = await fetch(
       `${baseUrl}/search?q=${encodeURIComponent(query)}&format=json`,
       {
-        headers: config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : undefined,
+        headers: {
+          ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}),
+          "X-Forwarded-For": "127.0.0.1",
+          "X-Real-IP": "127.0.0.1"
+        },
       },
     );
 

@@ -42,13 +42,17 @@ export async function GET(request: Request) {
     } catch {}
 
     const response = await fetch(`${SEARXNG_URL}/search?${params.toString()}`, {
-      headers: { Accept: "application/json" },
+      headers: { 
+        Accept: "application/json",
+        "X-Forwarded-For": "127.0.0.1",
+        "X-Real-IP": "127.0.0.1"
+      },
     });
 
     if (!response.ok) {
       const text = await response.text();
       console.error(`[api/search] SearXNG error: ${response.status} - ${text}`);
-      return NextResponse.json({ ok: false, error: `SearXNG ${response.status}` }, { status: 502 });
+      return NextResponse.json({ ok: false, error: `SearXNG ${response.status}` }, { status: 400 });
     }
 
     const data = await response.json();
@@ -86,7 +90,7 @@ export async function GET(request: Request) {
     console.error("[api/search] Error:", error);
     return NextResponse.json(
       { ok: false, error: error.message || "Falha ao buscar" },
-      { status: 500 }
+      { status: 400 }
     );
   }
 }

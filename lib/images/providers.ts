@@ -304,7 +304,11 @@ async function searchSearXNG(query: string, limit: number): Promise<ArticleImage
     try {
       const url = `${instance}/search?q=${encodeURIComponent(query)}&categories=images&format=json&image_proxy=0&safesearch=0&pageno=1`;
       const resp = await fetch(url, {
-        headers: { "User-Agent": "PublisherPilot/1.0 (article image search)" },
+        headers: { 
+          "User-Agent": "PublisherPilot/1.0 (article image search)",
+          "X-Forwarded-For": "127.0.0.1",
+          "X-Real-IP": "127.0.0.1"
+        },
         signal: AbortSignal.timeout(10000),
       });
       if (!resp.ok) continue;
