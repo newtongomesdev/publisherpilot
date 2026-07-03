@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-
-const SEARXNG_URL = process.env.SEARXNG_URL || "http://localhost:8080";
+import { searxngFetch } from "@/lib/searxng-client";
 
 export async function GET(request: Request) {
   try {
@@ -41,13 +40,7 @@ export async function GET(request: Request) {
       });
     } catch {}
 
-    const response = await fetch(`${SEARXNG_URL}/search?${params.toString()}`, {
-      headers: { 
-        Accept: "application/json",
-        "X-Forwarded-For": "127.0.0.1",
-        "X-Real-IP": "127.0.0.1"
-      },
-    });
+    const response = await searxngFetch(`/search?${params.toString()}`);
 
     if (!response.ok) {
       const text = await response.text();

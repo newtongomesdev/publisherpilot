@@ -287,6 +287,8 @@ async function searchOpenverse(query: string, limit: number): Promise<ArticleIma
 
 // ─── SearXNG (metasearch, no key required) ──────────────────────
 // Uses public SearXNG instances to aggregate image results from multiple engines.
+import { searxngFetch } from "@/lib/searxng-client";
+
 // Configure a custom instance via SEARXNG_URL env var, or uses public instances.
 const SEARXNG_PUBLIC_INSTANCES = [
   "https://search.sapti.me",
@@ -298,16 +300,63 @@ const SEARXNG_PUBLIC_INSTANCES = [
 
 async function searchSearXNG(query: string, limit: number): Promise<ArticleImage[]> {
   const baseUrl = process.env.SEARXNG_URL || "";
-  const instances = baseUrl ? [baseUrl] : SEARXNG_PUBLIC_INSTANCES;
+  const isLocal = !!baseUrl;
 
+  // For the local instance, we use searxngFetch to handle sessions.
+  // For public instances, we fall back to direct fetch.
+  if (isLocal) {
+    try {
+      const path = `/search?q=${encodeURIComponent(query)}&categories=images&format=json&image_proxy=0&safesearch=0&pageno=1`;
+      const resp = await searxngFetch(path, { timeoutMs: 10000 });
+      if (!resp.ok) {
+        console.error(`[providers] searchSearXNG local instance returned status ${resp.status}`);
+        return [];
+      }
+
+      const data = (await resp.json()) as {
+        results?: Array<{
+          img_src?: string;
+          thumbnail_src?: string;
+          title?: string;
+          engine?: string;
+          source?: string;
+          width?: number;
+          height?: number;
+        }>;
+      };
+
+      const results: ArticleImage[] = [];
+      for (const item of (data.results ?? [])) {
+        if (results.length >= limit) break;
+        const imgUrl = item.img_src || item.thumbnail_src;
+        if (!imgUrl || imgUrl.startsWith("data:")) continue;
+        if (/\.(svg|gif|ico)(\?|$)/i.test(imgUrl)) continue;
+        if (item.width && item.width < MIN_WIDTH) continue;
+        if (item.height && item.height < MIN_HEIGHT) continue;
+
+        const domain = (() => { try { return new URL(imgUrl).hostname.replace("www.", ""); } catch { return item.engine ?? "searxng"; } })();
+        results.push({
+          url: imgUrl,
+          alt: (item.title ?? query).replace(/<[^>]+>/g, "").slice(0, 200),
+          source: `${item.engine ?? "SearXNG"}/${domain}`,
+          provider: "searxng",
+        });
+      }
+
+      return results;
+    } catch (err: any) {
+      console.error(`[providers] searchSearXNG failed for local instance:`, err?.message || err);
+    }
+  }
+
+  // Fallback to public instances
+  const instances = SEARXNG_PUBLIC_INSTANCES;
   for (const instance of instances) {
     try {
       const url = `${instance}/search?q=${encodeURIComponent(query)}&categories=images&format=json&image_proxy=0&safesearch=0&pageno=1`;
       const resp = await fetch(url, {
         headers: { 
-          "User-Agent": "PublisherPilot/1.0 (article image search)",
-          "X-Forwarded-For": "127.0.0.1",
-          "X-Real-IP": "127.0.0.1"
+          "User-Agent": "PublisherPilot/1.0 (article image search)"
         },
         signal: AbortSignal.timeout(10000),
       });

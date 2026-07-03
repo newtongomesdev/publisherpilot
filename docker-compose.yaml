@@ -22,8 +22,10 @@ services:
     restart: unless-stopped
     environment:
       - SEARXNG_BASE_URL=http://localhost:8080/
+      - SEARXNG_LIMITER=false
     volumes:
-      - ./searxng_config:/etc/searxng
+      - ./searxng_config/settings.yml:/etc/searxng/settings.yml:ro
+      - ./searxng_config/limiter.toml:/etc/searxng/limiter.toml:ro
 
   # ChromaDB - Banco vetorial para busca semântica
   chromadb:

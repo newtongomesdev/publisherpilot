@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { searxngFetch } from "@/lib/searxng-client";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -7,21 +8,15 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: false, error: "Missing query" }, { status: 400 });
   }
 
-  const searxngUrl = process.env.SEARXNG_URL || "http://localhost:8080";
   const limit = Math.min(parseInt(searchParams.get("limit") || "15", 10), 20);
 
   try {
-    const url = `${searxngUrl}/search?q=${encodeURIComponent(query)}&categories=images&format=json&image_proxy=0&safesearch=0&pageno=1`;
-    const resp = await fetch(url, {
-      headers: { 
-        "User-Agent": "AtlasForge/1.0 (article image search)",
-        "X-Forwarded-For": "127.0.0.1",
-        "X-Real-IP": "127.0.0.1"
-      },
-      signal: AbortSignal.timeout(10000),
-    });
+    const path = `/search?q=${encodeURIComponent(query)}&categories=images&format=json&image_proxy=0&safesearch=0&pageno=1`;
+    const resp = await searxngFetch(path);
 
     if (!resp.ok) {
+      const body = await resp.text();
+      console.error(`[api/images/search] SearXNG returned ${resp.status}:`, body.slice(0, 200));
       return NextResponse.json({ ok: false, error: `SearXNG returned ${resp.status}` }, { status: 400 });
     }
 

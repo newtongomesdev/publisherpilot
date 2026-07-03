@@ -1,5 +1,6 @@
 import { env } from "@/lib/env";
 import { resolveProviderConfig } from "@/lib/integrations/provider-config";
+import { searxngFetch } from "@/lib/searxng-client";
 import type { SearchOptions, SearchProvider, SearchResult } from "@/lib/search/search-provider";
 
 type SearxngResult = {
@@ -28,15 +29,8 @@ export class SearxngSearchProvider implements SearchProvider {
       return [];
     }
 
-    const response = await fetch(
-      `${baseUrl}/search?q=${encodeURIComponent(query)}&format=json`,
-      {
-        headers: {
-          ...(config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}),
-          "X-Forwarded-For": "127.0.0.1",
-          "X-Real-IP": "127.0.0.1"
-        },
-      },
+    const response = await searxngFetch(
+      `/search?q=${encodeURIComponent(query)}&format=json`,
     );
 
     const payload = (await response.json()) as { results?: SearxngResult[] };
