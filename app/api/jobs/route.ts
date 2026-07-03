@@ -8,10 +8,12 @@ export async function GET() {
 
 export async function POST() {
   const { processNextQueuedJob } = await import("@/lib/jobs/worker");
-  const job = await processNextQueuedJob();
-  if (!job) {
-    return NextResponse.json({ ok: true, processed: false, job: null });
-  }
+  
+  // Trigger job processing in the background without awaiting it.
+  // This prevents HTTP request timeouts (Cloudflare 524) for long generation jobs.
+  processNextQueuedJob().catch((err) => {
+    console.error("[api/jobs] Background job processor error:", err);
+  });
 
-  return NextResponse.json({ ok: true, processed: true, job });
+  return NextResponse.json({ ok: true, message: "Job processor triggered in background" });
 }

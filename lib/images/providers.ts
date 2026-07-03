@@ -26,9 +26,9 @@ export const AUTH_PROVIDERS: ImageProviderKey[] = ["openverse", "fal"];
 
 
 /** Min width in pixels to accept an image */
-const MIN_WIDTH = 800;
+const MIN_WIDTH = 400;
 /** Min height in pixels to accept an image */
-const MIN_HEIGHT = 500;
+const MIN_HEIGHT = 250;
 
 // ─── Shared dedup helpers ────────────────────────────────────────
 
@@ -311,7 +311,10 @@ async function searchSearXNG(query: string, limit: number): Promise<ArticleImage
         },
         signal: AbortSignal.timeout(10000),
       });
-      if (!resp.ok) continue;
+      if (!resp.ok) {
+        console.error(`[providers] searchSearXNG instance ${instance} returned status ${resp.status}`);
+        continue;
+      }
 
       const data = (await resp.json()) as {
         results?: Array<{
@@ -344,7 +347,8 @@ async function searchSearXNG(query: string, limit: number): Promise<ArticleImage
       }
 
       if (results.length > 0) return results;
-    } catch {
+    } catch (err: any) {
+      console.error(`[providers] searchSearXNG failed for instance ${instance}:`, err?.message || err);
       continue; // try next instance
     }
   }

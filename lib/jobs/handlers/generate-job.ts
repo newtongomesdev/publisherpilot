@@ -321,14 +321,17 @@ export async function runGenerateJob(payload: Record<string, unknown>) {
             { falImageModel: payload.falImageModel as string },
           );
 
-          if (result.length > allImages.length) {
-            allImages = result;
+          // Append new unique images to our collection
+          for (const img of result) {
+            if (!allImages.some((existing) => existing.url === img.url)) {
+              allImages.push(img);
+            }
           }
           if (allImages.length >= sections.length) {
             break;
           }
-        } catch {
-          // Try the next fallback query.
+        } catch (err) {
+          console.error(`[generate-job] Image search failed for query "${query}":`, err);
         }
       }
       console.log("[generate-job] Found", allImages.length, "total images after fallbacks");
