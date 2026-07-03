@@ -66,6 +66,8 @@ for (const file of files) {
     } catch (e) {
       // Tolerate "already exists" errors for idempotency
       if (e.message?.includes("already exists")) continue;
+      // Tolerate duplicate column names
+      if (e.message?.includes("duplicate column name")) continue;
       // Tolerate "no such table" for ALTER TABLE on missing tables
       if (e.message?.includes("no such table")) continue;
       console.error(`[migrate] Error in ${file}: ${e.message}`);
