@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 4578",
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0",
@@ -33,6 +33,7 @@
     "clsx": "^2.1.1",
     "drizzle-orm": "0.45.2",
     "file-saver": "^2.0.5",
+    "framer-motion": "^12.42.2",
     "lucide-react": "^0.441.0",
     "next": "^15.0.0",
     "react": "^19.0.0",
