@@ -1,0 +1,9 @@
+FROM searxng/searxng:latest
+
+# Copy configuration files into the image
+COPY ./searxng_config_v2/settings.yml /etc/searxng/settings.yml
+COPY ./searxng_config_v2/limiter.toml /etc/searxng/limiter.toml
+
+# Ensure correct permissions
+USER root
+RUN chmod 644 /etc/searxng/settings.yml /etc/searxng/limiter.toml
