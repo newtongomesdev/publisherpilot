@@ -24,7 +24,7 @@ services:
       - SEARXNG_BASE_URL=http://localhost:8080/
       - SEARXNG_LIMITER=false
     volumes:
-      - ./searxng_config:/etc/searxng
+      - ./searxng_config_v2:/etc/searxng
 
   # ChromaDB - Banco vetorial para busca semântica
   chromadb:
