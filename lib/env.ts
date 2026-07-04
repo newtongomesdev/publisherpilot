@@ -9,7 +9,7 @@ const envSchema = z.object({
   OPENROUTER_API_KEY: z.string().optional(),
   OPENROUTER_BASE_URL: z.string().default("https://openrouter.ai/api/v1"),
   OPENROUTER_APP_NAME: z.string().default("PublisherPilot"),
-  OPENROUTER_SITE_URL: z.string().default("http://localhost:3000"),
+  OPENROUTER_SITE_URL: z.string().default("http://localhost:4578"),
   SEARXNG_URL: z.string().optional(),
   SEARXNG_API_KEY: z.string().optional(),
   WORDPRESS_URL: z.string().optional(),

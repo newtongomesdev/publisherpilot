@@ -43,9 +43,9 @@ COPY --from=builder /app/scripts/docker-entrypoint.sh ./scripts/docker-entrypoin
 RUN mkdir -p /app/data
 RUN sed -i 's/\r$//' /app/scripts/docker-entrypoint.sh && chmod +x /app/scripts/docker-entrypoint.sh
 
-EXPOSE 3000
+EXPOSE 4578
 
-ENV PORT=3000
+ENV PORT=4578
 ENV HOSTNAME="0.0.0.0"
 
 CMD ["sh", "/app/scripts/docker-entrypoint.sh"]

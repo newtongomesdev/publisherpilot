@@ -5,6 +5,7 @@ services:
     restart: unless-stopped
     environment:
       - NODE_ENV=production
+      - PORT=4578
       - DATABASE_URL=file:/app/data/data.db
       - CHROMADB_URL=http://chromadb:8000
       - RENDERER_URL=http://renderer:3003
