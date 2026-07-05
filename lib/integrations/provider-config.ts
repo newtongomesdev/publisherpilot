@@ -66,8 +66,12 @@ export async function resolveProviderConfig(providerKey: string, userId?: string
       return fallback;
     }
 
-    const { listApiProvidersByWorkspace } = await import("@/lib/db/queries");
-    const providers = await listApiProvidersByWorkspace(resolvedUserId, workspaceId);
+    const isUserScoped = providerKey === "wordpress-mcp";
+
+    const { listApiProvidersByWorkspace, listApiProvidersByUser } = await import("@/lib/db/queries");
+    const providers = isUserScoped
+      ? await listApiProvidersByUser(resolvedUserId)
+      : await listApiProvidersByWorkspace(resolvedUserId, workspaceId);
     const stored = providers.find((provider) => provider.providerKey === providerKey && provider.isEnabled);
 
     if (!stored) {

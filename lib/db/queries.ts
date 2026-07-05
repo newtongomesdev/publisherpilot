@@ -225,6 +225,14 @@ export async function listApiProvidersByWorkspace(userId: string, workspaceId: s
     .orderBy(desc(apiProviders.updatedAt));
 }
 
+export async function listApiProvidersByUser(userId: string) {
+  return db
+    .select()
+    .from(apiProviders)
+    .where(eq(apiProviders.userId, userId))
+    .orderBy(desc(apiProviders.updatedAt));
+}
+
 export async function upsertApiProvider(
   input: Omit<typeof apiProviders.$inferInsert, "id" | "createdAt" | "updatedAt"> & { id?: string },
 ) {
