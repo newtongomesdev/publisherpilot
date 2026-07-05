@@ -15,8 +15,6 @@ const envSchema = z.object({
   WORDPRESS_URL: z.string().optional(),
   WORDPRESS_USER: z.string().optional(),
   WORDPRESS_APP_PASSWORD: z.string().optional(),
-  WORDPRESS_MCP_ENDPOINT: z.string().optional(),
-  WORDPRESS_MCP_TOKEN: z.string().optional(),
 });
 
 // Lazy validation: only parses at runtime, not during build
