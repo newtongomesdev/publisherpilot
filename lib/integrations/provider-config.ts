@@ -38,14 +38,6 @@ const envFallbacks: Record<string, ServiceProviderConfig> = {
       capability: "publish",
     },
   },
-  "wordpress-mcp": {
-    baseUrl: env.WORDPRESS_MCP_ENDPOINT,
-    apiKey: env.WORDPRESS_MCP_TOKEN,
-    metadata: {
-      capability: "publish",
-      protocol: "mcp",
-    },
-  },
 };
 
 export async function resolveProviderConfig(providerKey: string, userId?: string): Promise<ServiceProviderConfig> {

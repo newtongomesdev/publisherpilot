@@ -118,6 +118,16 @@ const defaultSettings: SettingsPayload = {
       metadata: { capability: "publish", username: "", appPassword: "" },
     },
     {
+      providerKey: "wordpress-mcp",
+      displayName: "WordPress (MCP / Easy MCP AI)",
+      capability: "publish",
+      apiKey: "",
+      hasStoredKey: false,
+      baseUrl: "",
+      isEnabled: false,
+      metadata: { capability: "publish", protocol: "mcp" },
+    },
+    {
       providerKey: "instagram",
       displayName: "Instagram",
       capability: "publish",
@@ -195,6 +205,13 @@ const defaultSettings: SettingsPayload = {
       isEnabled: false,
       config: { siteUrl: "", status: "draft" },
       notes: "",
+    },
+    {
+      targetType: "wordpress-mcp",
+      name: "WordPress MCP",
+      isEnabled: false,
+      config: { mcpEndpoint: "", mcpToken: "", status: "draft" },
+      notes: "Conexao via Easy MCP AI plugin. Preencha o endpoint e token no provider.",
     },
     {
       targetType: "instagram",
