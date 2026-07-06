@@ -18,10 +18,11 @@ services:
 
   # SearXNG - Metasearch para busca de imagens
   searxng:
-    build:
-      context: .
-      dockerfile: Dockerfile.searxng
+    image: searxng/searxng:latest
     restart: unless-stopped
+    volumes:
+      - ./searxng_config_v2/settings.yml:/etc/searxng/settings.yml:ro
+      - ./searxng_config_v2/limiter.toml:/etc/searxng/limiter.toml:ro
     environment:
       - SEARXNG_BASE_URL=http://localhost:8080/
       - SEARXNG_LIMITER=false
