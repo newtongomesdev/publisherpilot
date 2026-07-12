@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogoutButton } from "@/components/logout-button";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
-import { LayoutDashboard, FileText, Download, Settings, Briefcase, PlusCircle, Mic, Volume2, BarChart3, Music, Layers, Image, PenTool, Search } from "lucide-react";
+import { LayoutDashboard, FileText, Download, Settings, Briefcase, PlusCircle, Mic, Volume2, BarChart3, Music, Layers, Image, PenTool, Search, Video } from "lucide-react";
 import { SidebarCostSection } from "@/components/sidebar-cost-section";
 import clsx from "clsx";
 
@@ -32,6 +32,7 @@ export function DashboardShell({
     { name: "Carrossel Studio", href: "/dashboard/carousel", icon: Layers },
     { name: "Busca", href: "/dashboard/search", icon: Search },
     { name: "Gráficos", href: "/dashboard/quickchart", icon: BarChart3 },
+    { name: "Video Studio", href: "/dashboard/video-generator", icon: Video },
   ];
 
 
