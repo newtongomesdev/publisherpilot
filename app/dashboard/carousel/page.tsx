@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { requireCurrentUser } from "@/lib/auth/session";
 import { requireCurrentWorkspace } from "@/lib/workspaces/session";
+import { Video } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -35,10 +37,18 @@ export default async function CarouselPage() {
         <div className="overflow-hidden rounded-3xl border border-zinc-800/80 bg-zinc-950/40 backdrop-blur-md shadow-2xl">
           <iframe 
             src="/carousel-editor/index.html" 
-            className="w-full h-[calc(100vh-220px)] border-none"
+            className="w-full h-[calc(100vh-280px)] border-none"
             title="Editor de Carrossel"
           />
         </div>
+
+        <Link
+          href="/dashboard/video-generator?mode=image-to-video"
+          className="inline-flex items-center gap-2 rounded-full border border-purple-700 bg-purple-950/40 px-6 py-3 font-medium text-purple-200 hover:bg-purple-950/60 transition-colors"
+        >
+          <Video className="h-4 w-4" />
+          Converter em Video
+        </Link>
       </div>
     </DashboardShell>
   );

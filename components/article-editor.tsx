@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { WysiwygEditor } from "@/components/wysiwyg-editor";
 import { ContentSuggestions } from "@/components/content-suggestions";
-import { Share2 } from "lucide-react";
+import { Share2, Video } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type ArticleEditorProps = {
   articleProjectId: string;
@@ -17,6 +18,7 @@ export function ArticleEditor({ articleProjectId, title, markdown, htmlContent, 
   const [feedback, setFeedback] = useState("");
   const [feedbackType, setFeedbackType] = useState<"success" | "error" | "info">("info");
   const [isEditing, setIsEditing] = useState(false);
+  const router = useRouter();
 
   function showFeedback(msg: string, type: "success" | "error" | "info" = "info") {
     setFeedback(msg);
@@ -236,6 +238,18 @@ export function ArticleEditor({ articleProjectId, title, markdown, htmlContent, 
         >
           <Share2 className="h-4 w-4" />
           Compartilhar artigo
+        </button>
+
+        {/* Video generation button */}
+        <button
+          className="w-full rounded-full border border-purple-700 bg-purple-950/40 px-4 py-3 font-medium text-purple-200 hover:bg-purple-950/60 transition-colors flex items-center justify-center gap-2"
+          onClick={() => {
+            const prompt = `Video resumo do artigo: ${title}`;
+            router.push(`/dashboard/video-generator?prompt=${encodeURIComponent(prompt)}`);
+          }}
+        >
+          <Video className="h-4 w-4" />
+          Gerar Video
         </button>
 
         {/* PDF via Print */}
