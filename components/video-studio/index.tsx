@@ -76,7 +76,8 @@ function VideoStudioInner() {
         addClip(clip);
         setPreviewClip(clip);
       } else {
-        alert(data.error || 'Falha ao gerar video');
+        console.error('[Video Generate]', data);
+        alert(`Erro ${response.status}: ${data.error || 'Falha ao gerar video'}\n${data.stack ? data.stack.slice(0, 300) : ''}`);
       }
     } catch (err: any) {
       alert(err.message || 'Erro ao conectar com a API');

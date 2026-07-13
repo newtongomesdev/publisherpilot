@@ -44,7 +44,7 @@ interface VideoStudioState {
 
 export const useVideoStudioStore = create<VideoStudioState>((set) => ({
   selectedProvider: 'fal',
-  selectedModel: 'kling-2.0',
+  selectedModel: 'kling-v3-standard',
   apiKeys: {},
   mode: 'text-to-video',
   prompt: '',

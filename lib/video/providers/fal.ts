@@ -4,7 +4,8 @@ import type { VideoGenerationRequest, VideoGenerationResponse, VideoModel, Model
 export interface FalVideoModel {
   modelId: string;
   name: string;
-  falModel: string;
+  textToVideoEndpoint: string;
+  imageToVideoEndpoint: string;
   capabilities: string[];
   maxDuration: number;
   resolutions: string[];
@@ -14,44 +15,37 @@ export interface FalVideoModel {
 
 export const FAL_VIDEO_MODELS: FalVideoModel[] = [
   {
-    modelId: 'kling-2.0',
-    name: 'Kling 2.0',
-    falModel: 'fal-ai/kling-video/v2',
+    modelId: 'kling-v3-pro',
+    name: 'Kling V3 Pro',
+    textToVideoEndpoint: 'fal-ai/kling-video/v3/pro/text-to-video',
+    imageToVideoEndpoint: 'fal-ai/kling-video/v3/pro/image-to-video',
+    capabilities: ['text-to-video', 'image-to-video'],
+    maxDuration: 15,
+    resolutions: ['720p', '1080p'],
+    costPerSecond: 0.15,
+    description: 'Premium quality, native audio, motion control',
+  },
+  {
+    modelId: 'kling-v3-standard',
+    name: 'Kling V3 Standard',
+    textToVideoEndpoint: 'fal-ai/kling-video/v3/standard/text-to-video',
+    imageToVideoEndpoint: 'fal-ai/kling-video/v3/standard/image-to-video',
+    capabilities: ['text-to-video', 'image-to-video'],
+    maxDuration: 15,
+    resolutions: ['720p', '1080p'],
+    costPerSecond: 0.08,
+    description: 'Good quality, affordable, native audio',
+  },
+  {
+    modelId: 'kling-v2.6-pro',
+    name: 'Kling V2.6 Pro',
+    textToVideoEndpoint: 'fal-ai/kling-video/v2.6/pro/text-to-video',
+    imageToVideoEndpoint: 'fal-ai/kling-video/v2.6/pro/image-to-video',
     capabilities: ['text-to-video', 'image-to-video'],
     maxDuration: 10,
     resolutions: ['720p', '1080p'],
-    costPerSecond: 0.015,
-    description: 'High quality video generation with good motion and coherence',
-  },
-  {
-    modelId: 'kling-1.6',
-    name: 'Kling 1.6',
-    falModel: 'fal-ai/kling-video/v1/6',
-    capabilities: ['text-to-video', 'image-to-video'],
-    maxDuration: 10,
-    resolutions: ['720p'],
-    costPerSecond: 0.01,
-    description: 'Cost-effective video generation',
-  },
-  {
-    modelId: 'minimax-video',
-    name: 'MiniMax Video',
-    falModel: 'fal-ai/minimax-video',
-    capabilities: ['text-to-video', 'image-to-video'],
-    maxDuration: 6,
-    resolutions: ['720p', '1080p'],
-    costPerSecond: 0.02,
-    description: 'Fast generation with good quality',
-  },
-  {
-    modelId: 'hailuo-video',
-    name: 'Hailuo Video',
-    falModel: 'fal-ai/hailuo/video',
-    capabilities: ['text-to-video', 'image-to-video'],
-    maxDuration: 6,
-    resolutions: ['720p'],
-    costPerSecond: 0.008,
-    description: 'Budget-friendly option with decent quality',
+    costPerSecond: 0.10,
+    description: 'Cinematic visuals, fluid motion, native audio',
   },
 ];
 
@@ -61,35 +55,68 @@ function resolveFalModel(modelId: string): FalVideoModel {
   return model;
 }
 
+function getEndpoint(model: FalVideoModel, mode: string): string {
+  if (mode === 'image-to-video' || mode === 'extend' || mode === 'scene') {
+    return model.imageToVideoEndpoint;
+  }
+  return model.textToVideoEndpoint;
+}
+
+async function pollForResult(statusUrl: string, apiKey: string, maxWaitMs = 300000): Promise<any> {
+  const start = Date.now();
+  while (Date.now() - start < maxWaitMs) {
+    const response = await fetch(statusUrl, {
+      headers: { Authorization: `Key ${apiKey}` },
+    });
+    if (!response.ok) {
+      throw new Error(`FAL polling failed: ${response.statusText}`);
+    }
+    const data = await response.json();
+    if (data.status === 'COMPLETED') {
+      const resultResponse = await fetch(data.response_url, {
+        headers: { Authorization: `Key ${apiKey}` },
+      });
+      return await resultResponse.json();
+    }
+    if (data.status === 'FAILED') {
+      throw new Error(data.error || 'FAL video generation failed');
+    }
+    await new Promise((r) => setTimeout(r, 3000));
+  }
+  throw new Error('FAL video generation timed out');
+}
+
 export const falVideoProvider: VideoProvider = {
   id: 'fal',
   name: 'fal',
   label: 'FAL.ai',
 
   async generateVideo(request: VideoGenerationRequest): Promise<VideoGenerationResponse> {
-    const modelId = request.model || 'kling-2.0';
+    const modelId = (request as any).model || 'kling-v3-standard';
     const model = resolveFalModel(modelId);
     const apiKey = process.env.FAL_KEY;
     if (!apiKey) throw new Error('FAL_KEY environment variable is not set');
 
-    const body: Record<string, any> = {
-      prompt: request.prompt,
-      num_frames: request.duration * 8,
-    };
+    const endpoint = getEndpoint(model, request.mode);
+
+    const body: Record<string, any> = {};
+
+    if (request.prompt) body.prompt = request.prompt;
+    body.duration = String(Math.min(request.duration, model.maxDuration));
 
     if (request.negativePrompt) body.negative_prompt = request.negativePrompt;
-    if (request.imageUrl) body.image_url = request.imageUrl;
-    if (request.resolution === '1080p') body.quality = 'high';
 
-    if (request.camera) {
-      body.camera = {
-        type: request.camera.type,
-        ...(request.camera.direction && { direction: request.camera.direction }),
-        ...(request.camera.intensity && { intensity: request.camera.intensity }),
-      };
+    // Image-to-video fields
+    if (request.imageUrl) body.start_image_url = request.imageUrl;
+    if (request.finalImageUrl) body.end_image_url = request.finalImageUrl;
+
+    // Text-to-video only
+    if (!request.imageUrl && request.mode === 'text-to-video') {
+      body.aspect_ratio = '16:9';
     }
 
-    const response = await fetch(`https://fal.run/${model.falModel}`, {
+    // Submit to queue
+    const submitResponse = await fetch(`https://queue.fal.run/${endpoint}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -98,20 +125,39 @@ export const falVideoProvider: VideoProvider = {
       body: JSON.stringify(body),
     });
 
-    if (!response.ok) {
-      const error = await response.text();
+    if (!submitResponse.ok) {
+      const error = await submitResponse.text();
       throw new Error(`FAL API error: ${error}`);
     }
 
-    const data = await response.json();
-    const videoUrl = data.video?.url || data.output?.video_url;
+    const submitData = await submitResponse.json();
+
+    if (!submitData.status_url) {
+      // Synchronous response (fal.run pattern)
+      const videoUrl = submitData.video?.url;
+      if (!videoUrl) throw new Error('No video URL in FAL response');
+      return {
+        id: `fal-${Date.now()}`,
+        videoUrl,
+        thumbnailUrl: submitData.video?.thumbnail_url,
+        duration: request.duration,
+        model: model.name,
+        provider: 'fal',
+        cost: model.costPerSecond * request.duration,
+        status: 'completed',
+      };
+    }
+
+    // Async queue pattern — poll for result
+    const result = await pollForResult(submitData.status_url, apiKey);
+    const videoUrl = result.video?.url;
 
     if (!videoUrl) throw new Error('No video URL in FAL response');
 
     return {
-      id: `fal-${Date.now()}`,
+      id: submitData.request_id || `fal-${Date.now()}`,
       videoUrl,
-      thumbnailUrl: data.video?.thumbnail_url || data.output?.thumbnail_url,
+      thumbnailUrl: result.video?.thumbnail_url,
       duration: request.duration,
       model: model.name,
       provider: 'fal',

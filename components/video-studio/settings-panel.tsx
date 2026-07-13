@@ -152,7 +152,7 @@ export function SettingsPanel() {
               type="password"
               value={apiKeys[selectedProvider] || ''}
               onChange={(e) => setApiKey(selectedProvider, e.target.value)}
-              placeholder={`Insira a API key do ${currentProvider?.name || 'provider'}`}
+              placeholder="Insira sua API key do FAL ou OpenRouter"
               className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-emerald-600"
             />
             <p className="text-[10px] text-zinc-600 mt-1">Chave salva apenas nesta sessao</p>

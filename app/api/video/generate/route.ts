@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true, video: result });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Failed to generate video' }, { status: 500 });
+    console.error('[Video Generate Error]', error);
+    return NextResponse.json({ error: error.message || 'Failed to generate video', stack: error.stack }, { status: 500 });
   }
 }
