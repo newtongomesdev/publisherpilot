@@ -118,8 +118,8 @@ export const openrouterVideoProvider: VideoProvider = {
 
     if (request.imageUrl || request.finalImageUrl) {
       body.frame_images = [];
-      if (request.imageUrl) body.frame_images.push(request.imageUrl);
-      if (request.finalImageUrl) body.frame_images.push(request.finalImageUrl);
+      if (request.imageUrl) body.frame_images.push({ url: request.imageUrl });
+      if (request.finalImageUrl) body.frame_images.push({ url: request.finalImageUrl });
     }
 
     if (request.camera && request.camera.type !== 'static') {
