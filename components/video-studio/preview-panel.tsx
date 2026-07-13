@@ -7,7 +7,7 @@ import { CameraControls } from './camera-controls';
 
 export function PreviewPanel() {
   const store = useVideoStudioStore();
-  const { previewClip, isGenerating, prompt, setPrompt, imageUrl, setImageUrl, mode, videoUrl, setVideoUrl } = store;
+  const { previewClip, isGenerating, prompt, setPrompt, imageUrl, setImageUrl, finalImageUrl, setFinalImageUrl, mode, videoUrl, setVideoUrl } = store;
 
   return (
     <div className="flex flex-col h-full">
@@ -30,13 +30,26 @@ export function PreviewPanel() {
               placeholder="Como animar esta imagem?"
               className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-emerald-600 resize-none h-20"
             />
-            <input
-              type="url"
-              value={imageUrl || ''}
-              onChange={(e) => setImageUrl(e.target.value || null)}
-              placeholder="URL da imagem para animar"
-              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-emerald-600"
-            />
+            <div>
+              <label className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1 block">Imagem Inicial (primeiro frame)</label>
+              <input
+                type="url"
+                value={imageUrl || ''}
+                onChange={(e) => setImageUrl(e.target.value || null)}
+                placeholder="URL da imagem inicial"
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-emerald-600"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1 block">Imagem Final (ultimo frame, opcional)</label>
+              <input
+                type="url"
+                value={finalImageUrl || ''}
+                onChange={(e) => setFinalImageUrl(e.target.value || null)}
+                placeholder="URL da imagem final (opcional)"
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-emerald-600"
+              />
+            </div>
           </div>
         )}
         {(mode === 'extend' || mode === 'edit') && (

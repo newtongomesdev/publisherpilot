@@ -15,7 +15,7 @@ function VideoStudioInner() {
   const initialPrompt = searchParams.get('prompt');
   const initialMode = searchParams.get('mode');
 
-  const { isGenerating, setIsGenerating, addClip, setPreviewClip, prompt, mode, duration, resolution, camera, imageUrl, videoUrl } =
+  const { isGenerating, setIsGenerating, addClip, setPreviewClip, prompt, mode, duration, resolution, camera, imageUrl, finalImageUrl, videoUrl } =
     useVideoStudioStore();
 
   useEffect(() => {
@@ -45,6 +45,7 @@ function VideoStudioInner() {
           resolution,
           camera,
           imageUrl,
+          finalImageUrl,
           videoUrl,
         }),
       });

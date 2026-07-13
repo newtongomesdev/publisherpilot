@@ -9,6 +9,7 @@ interface VideoStudioState {
   prompt: string;
   negativePrompt: string;
   imageUrl: string | null;
+  finalImageUrl: string | null;
   videoUrl: string | null;
   camera: CameraConfig;
   duration: number;
@@ -26,6 +27,7 @@ interface VideoStudioState {
   setPrompt: (prompt: string) => void;
   setNegativePrompt: (prompt: string) => void;
   setImageUrl: (url: string | null) => void;
+  setFinalImageUrl: (url: string | null) => void;
   setVideoUrl: (url: string | null) => void;
   setCamera: (camera: CameraConfig) => void;
   setDuration: (duration: number) => void;
@@ -48,6 +50,7 @@ export const useVideoStudioStore = create<VideoStudioState>((set) => ({
   prompt: '',
   negativePrompt: '',
   imageUrl: null,
+  finalImageUrl: null,
   videoUrl: null,
   camera: { type: 'static' },
   duration: 4,
@@ -66,6 +69,7 @@ export const useVideoStudioStore = create<VideoStudioState>((set) => ({
   setPrompt: (prompt) => set({ prompt }),
   setNegativePrompt: (negativePrompt) => set({ negativePrompt }),
   setImageUrl: (imageUrl) => set({ imageUrl }),
+  setFinalImageUrl: (finalImageUrl) => set({ finalImageUrl }),
   setVideoUrl: (videoUrl) => set({ videoUrl }),
   setCamera: (camera) => set({ camera }),
   setDuration: (duration) => set({ duration }),

@@ -3,6 +3,7 @@ export interface VideoGenerationRequest {
   negativePrompt?: string;
   mode: 'text-to-video' | 'image-to-video' | 'extend' | 'scene' | 'edit';
   imageUrl?: string;
+  finalImageUrl?: string;
   videoUrl?: string;
   duration: number;
   resolution: '720p' | '1080p';

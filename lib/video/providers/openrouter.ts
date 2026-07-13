@@ -116,8 +116,10 @@ export const openrouterVideoProvider: VideoProvider = {
       resolution: request.resolution || '720p',
     };
 
-    if (request.imageUrl) {
-      body.frame_images = [request.imageUrl];
+    if (request.imageUrl || request.finalImageUrl) {
+      body.frame_images = [];
+      if (request.imageUrl) body.frame_images.push(request.imageUrl);
+      if (request.finalImageUrl) body.frame_images.push(request.finalImageUrl);
     }
 
     if (request.camera && request.camera.type !== 'static') {
