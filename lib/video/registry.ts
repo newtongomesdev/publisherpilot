@@ -1,5 +1,6 @@
 import type { VideoProvider } from './video-provider';
 import { falVideoProvider } from './providers/fal';
+import { openrouterVideoProvider } from './providers/openrouter';
 import { createUnsupportedVideoProvider } from './providers/unsupported';
 
 const videoProviders = new Map<string, VideoProvider>();
@@ -9,8 +10,8 @@ function register(provider: VideoProvider) {
 }
 
 register(falVideoProvider);
+register(openrouterVideoProvider);
 register(createUnsupportedVideoProvider('replicate', 'Replicate'));
-register(createUnsupportedVideoProvider('openai-sora', 'OpenAI Sora'));
 
 export function getVideoProvider(name: string): VideoProvider | undefined {
   return videoProviders.get(name);
