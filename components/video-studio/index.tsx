@@ -28,11 +28,11 @@ function VideoStudioInner() {
   }, [initialPrompt, initialMode]);
 
   async function handleGenerate() {
-    if (!prompt.trim()) return;
+    const state = useVideoStudioStore.getState();
+    if (!prompt.trim() && !state.imageUrl && !state.finalImageUrl && !state.videoUrl) return;
 
     setIsGenerating(true);
     try {
-      const state = useVideoStudioStore.getState();
       const response = await fetch('/api/video/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -106,7 +106,7 @@ function VideoStudioInner() {
       <div className="border-t border-zinc-800/60 px-6 py-4 flex justify-center">
         <button
           onClick={handleGenerate}
-          disabled={isGenerating || !prompt.trim()}
+          disabled={isGenerating || (!prompt.trim() && !imageUrl && !finalImageUrl && !videoUrl)}
           className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed px-12 py-3 rounded-xl text-white font-semibold shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2"
         >
           {isGenerating ? (

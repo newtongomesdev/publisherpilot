@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { getVideoProvider } from '@/lib/video/registry';
 
 const generateVideoSchema = z.object({
-  prompt: z.string().min(1),
+  prompt: z.string().optional().default(''),
   negativePrompt: z.string().optional(),
   mode: z.enum(['text-to-video', 'image-to-video', 'extend', 'scene', 'edit']),
   model: z.string().optional().default('kling-2.0'),
