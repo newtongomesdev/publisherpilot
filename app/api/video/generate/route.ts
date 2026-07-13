@@ -23,9 +23,16 @@ const generateVideoSchema = z.object({
   fps: z.number().optional(),
 });
 
+export const maxApiRouteBodySize = 20 * 1024 * 1024; // 20MB for base64 images
+
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    let body: any;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: 'Request body too large or invalid JSON' }, { status: 400 });
+    }
     const parsed = generateVideoSchema.parse(body);
 
     const videoProvider = getVideoProvider(parsed.provider);
