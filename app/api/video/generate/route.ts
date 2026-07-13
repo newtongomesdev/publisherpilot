@@ -8,9 +8,9 @@ const generateVideoSchema = z.object({
   mode: z.enum(['text-to-video', 'image-to-video', 'extend', 'scene', 'edit']),
   model: z.string().optional().default('kling-2.0'),
   provider: z.string().optional().default('fal'),
-  imageUrl: z.string().url().optional(),
-  finalImageUrl: z.string().url().optional(),
-  videoUrl: z.string().url().optional(),
+  imageUrl: z.string().optional(),
+  finalImageUrl: z.string().optional(),
+  videoUrl: z.string().optional(),
   duration: z.number().min(1).max(30).optional().default(4),
   resolution: z.enum(['720p', '1080p']).optional().default('720p'),
   camera: z

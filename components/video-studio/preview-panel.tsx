@@ -1,9 +1,72 @@
 'use client';
 
 import { useVideoStudioStore } from '@/lib/video/store';
-import { Play, Download, Loader2 } from 'lucide-react';
+import { Play, Download, Loader2, Upload, X } from 'lucide-react';
 import { ModeTabs } from './mode-tabs';
 import { CameraControls } from './camera-controls';
+
+function ImageInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string | null;
+  onChange: (url: string | null) => void;
+}) {
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      onChange(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  }
+
+  const isDataUrl = value?.startsWith('data:');
+
+  return (
+    <div>
+      <label className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1 block">{label}</label>
+      {value ? (
+        <div className="relative">
+          <img
+            src={value}
+            alt={label}
+            className="w-full h-32 object-cover rounded-xl border border-zinc-800"
+          />
+          <button
+            onClick={() => onChange(null)}
+            className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 rounded-lg p-1.5 text-white transition-colors"
+          >
+            <X className="h-3 w-3" />
+          </button>
+          {isDataUrl && (
+            <span className="absolute bottom-2 left-2 bg-black/70 rounded px-2 py-0.5 text-[10px] text-zinc-300">
+              Arquivo local
+            </span>
+          )}
+        </div>
+      ) : (
+        <div className="flex gap-2">
+          <input
+            type="url"
+            onChange={(e) => onChange(e.target.value || null)}
+            placeholder="URL da imagem"
+            className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-emerald-600"
+          />
+          <label className="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 transition-colors cursor-pointer flex items-center gap-1.5 text-sm">
+            <Upload className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Arquivo</span>
+            <input type="file" accept="image/*" className="hidden" onChange={handleFile} />
+          </label>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function PreviewPanel() {
   const store = useVideoStudioStore();
@@ -30,26 +93,16 @@ export function PreviewPanel() {
               placeholder="Como animar esta imagem?"
               className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-emerald-600 resize-none h-20"
             />
-            <div>
-              <label className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1 block">Imagem Inicial (primeiro frame)</label>
-              <input
-                type="url"
-                value={imageUrl || ''}
-                onChange={(e) => setImageUrl(e.target.value || null)}
-                placeholder="URL da imagem inicial"
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-emerald-600"
-              />
-            </div>
-            <div>
-              <label className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1 block">Imagem Final (ultimo frame, opcional)</label>
-              <input
-                type="url"
-                value={finalImageUrl || ''}
-                onChange={(e) => setFinalImageUrl(e.target.value || null)}
-                placeholder="URL da imagem final (opcional)"
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-emerald-600"
-              />
-            </div>
+            <ImageInput
+              label="Imagem Inicial (primeiro frame)"
+              value={imageUrl}
+              onChange={setImageUrl}
+            />
+            <ImageInput
+              label="Imagem Final (ultimo frame, opcional)"
+              value={finalImageUrl}
+              onChange={setFinalImageUrl}
+            />
           </div>
         )}
         {(mode === 'extend' || mode === 'edit') && (
