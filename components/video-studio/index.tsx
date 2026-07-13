@@ -33,21 +33,37 @@ function VideoStudioInner() {
 
     setIsGenerating(true);
     try {
+      const formData = new FormData();
+      formData.set('prompt', prompt);
+      formData.set('mode', mode);
+      formData.set('provider', state.selectedProvider);
+      formData.set('model', state.selectedModel);
+      formData.set('duration', String(duration));
+      formData.set('resolution', resolution);
+      if (camera) formData.set('camera', JSON.stringify(camera));
+      if (videoUrl) formData.set('videoUrl', videoUrl);
+
+      // Convert base64 data URLs to File blobs for FormData
+      if (imageUrl) {
+        if (imageUrl.startsWith('data:')) {
+          const blob = await fetch(imageUrl).then(r => r.blob());
+          formData.set('imageUrl', blob, 'initial.jpg');
+        } else {
+          formData.set('imageUrl', imageUrl);
+        }
+      }
+      if (finalImageUrl) {
+        if (finalImageUrl.startsWith('data:')) {
+          const blob = await fetch(finalImageUrl).then(r => r.blob());
+          formData.set('finalImageUrl', blob, 'final.jpg');
+        } else {
+          formData.set('finalImageUrl', finalImageUrl);
+        }
+      }
+
       const response = await fetch('/api/video/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt,
-          mode,
-          provider: state.selectedProvider,
-          model: state.selectedModel,
-          duration,
-          resolution,
-          camera,
-          imageUrl,
-          finalImageUrl,
-          videoUrl,
-        }),
+        body: formData,
       });
 
       const data = await response.json();
